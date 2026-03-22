@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Asistencia Preescolar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistencia Preescolar — QR</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -11,49 +11,47 @@
   --bg:#FFF8F0;--card:#fff;--primary:#FF6B35;
   --secondary:#4ECDC4;--accent:#FFE66D;--retardo:#FF4757;--salida:#A29BFE;
   --presente:#2ED573;--ausente:#DFE6E9;
+  --sep:#FF6B35;--vac:#4ECDC4;--reu:#A29BFE;--per:#FFE66D;--inc:#FF6B81;
   --text:#2D3436;--muted:#636E72;--shadow:0 4px 20px rgba(0,0,0,.10);--r:18px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:70px;}
 
-/* ── FLASH DE REGISTRO (aparece cuando llega alumno por NFC) ── */
-#flash-overlay{
-  position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  background:rgba(0,0,0,0);pointer-events:none;transition:background .2s;
-}
-#flash-overlay.show{background:rgba(0,0,0,.6);pointer-events:all;}
-#flash-card{
-  background:var(--card);border-radius:28px;padding:36px 32px;text-align:center;
-  width:88%;max-width:340px;transform:scale(.7);opacity:0;
-  transition:all .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.3);
-}
+/* FLASH */
+#flash-overlay{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);pointer-events:none;transition:background .2s;}
+#flash-overlay.show{background:rgba(0,0,0,.65);pointer-events:all;}
+#flash-card{background:var(--card);border-radius:28px;padding:34px 30px;text-align:center;width:88%;max-width:380px;transform:scale(.7);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.3);}
 #flash-overlay.show #flash-card{transform:scale(1);opacity:1;}
-#flash-icon{font-size:4rem;margin-bottom:10px;}
-#flash-name{font-family:'Baloo 2',sans-serif;font-size:1.5rem;font-weight:800;line-height:1.2;margin-bottom:6px;}
-#flash-tipo{font-size:1rem;font-weight:700;margin-bottom:20px;}
-#flash-hora{font-size:.85rem;color:var(--muted);}
-#flash-close{
-  margin-top:20px;padding:12px 32px;border:none;border-radius:14px;
-  background:var(--primary);color:#fff;font-family:'Baloo 2',sans-serif;
-  font-size:1rem;font-weight:800;cursor:pointer;width:100%;
-}
+#flash-icon{font-size:4.5rem;margin-bottom:8px;}
+#flash-name{font-family:'Baloo 2',sans-serif;font-size:1.55rem;font-weight:800;line-height:1.2;margin-bottom:6px;}
+#flash-tipo{font-size:1rem;font-weight:700;margin-bottom:16px;}
+#flash-hora{font-size:.82rem;color:var(--muted);}
+#flash-close{margin-top:18px;padding:12px 32px;border:none;border-radius:14px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;width:100%;}
 
-/* ── HEADER ── */
+/* SUSPENSION BANNER */
+#susp-banner{display:none;margin:0 14px;padding:14px 16px;border-radius:14px;align-items:center;gap:12px;animation:si .3s ease;}
+#susp-banner.show{display:flex;}
+@keyframes si{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.susp-icon{font-size:1.6rem;}
+.susp-text{flex:1;}
+.susp-title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;}
+.susp-sub{font-size:.75rem;margin-top:2px;opacity:.85;}
+.susp-quitar{border:none;background:rgba(0,0,0,.15);color:inherit;border-radius:8px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+
+/* HEADER */
 header{background:linear-gradient(135deg,var(--primary),#FF8C42);padding:22px 20px 56px;position:relative;overflow:hidden;}
 header::after{content:'';position:absolute;bottom:-28px;left:0;right:0;height:56px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0;}
-header h1{font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.15);}
+header h1{font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:800;color:#fff;}
 header p{color:rgba(255,255,255,.85);font-size:.82rem;margin-top:3px;}
-.hico{font-size:2rem;margin-bottom:6px;}
 
-/* ── CLOCK ── */
+/* CLOCK */
 #clock-bar{display:flex;justify-content:space-between;align-items:center;background:var(--card);margin:-18px 14px 0;padding:12px 18px;border-radius:var(--r);box-shadow:var(--shadow);position:relative;z-index:2;}
 .time{font-family:'Baloo 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--primary);}
 .date{font-size:.75rem;color:var(--muted);}
 #retardo-badge{background:var(--retardo);color:#fff;font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:20px;display:none;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* ── STATS ── */
+/* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 14px 0;}
 .sc{background:var(--card);border-radius:13px;padding:11px 5px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .sc .num{font-family:'Baloo 2',sans-serif;font-size:1.4rem;font-weight:800;line-height:1;}
@@ -61,38 +59,39 @@ header p{color:rgba(255,255,255,.85);font-size:.82rem;margin-top:3px;}
 .sc.sp .num{color:var(--presente)}.sc.sr .num{color:var(--retardo)}
 .sc.sa .num{color:#B2BEC3}.sc.sb .num{color:var(--salida)}
 
-/* ── MODO ── */
-.nfc-zone{margin:16px 14px 0;display:flex;flex-direction:column;gap:10px;}
-.mode-toggle{display:flex;gap:8px;}
+/* SCANNER */
+.scanner-zone{margin:16px 14px 0;}
+.mode-toggle{display:flex;gap:8px;margin-bottom:10px;}
 .mbtn{flex:1;padding:10px 6px;border:2px solid transparent;border-radius:12px;background:var(--card);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s;}
 .mbtn.ae{border-color:var(--presente);color:var(--presente);background:#F0FFF8;}
 .mbtn.ab{border-color:var(--salida);color:var(--salida);background:#F4F3FF;}
+.scanner-box{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;}
+.scanner-box h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.scanner-input-wrap{position:relative;}
+#qr-input{width:100%;padding:14px 50px 14px 16px;border:2.5px solid var(--secondary);border-radius:14px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text);outline:none;background:#F0FFFE;caret-color:var(--secondary);}
+#qr-input::placeholder{color:#B2BEC3;font-weight:400;}
+#qr-input:disabled{background:#F5F5F5;border-color:#DDD;color:#B2BEC3;}
+.scan-ico{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.4rem;pointer-events:none;}
+.scanner-hint{font-size:.78rem;color:var(--muted);line-height:1.6;background:var(--bg);border-radius:10px;padding:10px 12px;}
+.scanner-active{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:700;color:var(--secondary);}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--secondary);animation:pulse 1s infinite;}
+#btn-manual{width:100%;padding:12px;border:2px solid #E0E0E0;border-radius:12px;background:#fff;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;color:var(--muted);margin-top:4px;}
 
-/* ── INSTRUCCIÓN NFC ── */
-.nfc-info{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);border-left:4px solid var(--secondary);}
-.nfc-info h3{font-family:'Baloo 2',sans-serif;font-size:1rem;font-weight:800;margin-bottom:6px;color:var(--secondary);}
-.nfc-info p{font-size:.8rem;color:var(--muted);line-height:1.5;}
+/* STATUS */
+#qr-status{margin:10px 14px 0;padding:12px 16px;border-radius:13px;font-size:.85rem;font-weight:600;display:none;align-items:center;gap:10px;}
+#qr-status.ok{background:#EDFFF8;color:#00B894;border:1.5px solid #00B894;display:flex;}
+#qr-status.warn{background:#FFF5F5;color:var(--retardo);border:1.5px solid var(--retardo);display:flex;}
 
-/* ── BOTÓN MANUAL ── */
-#btn-manual-open{width:100%;padding:14px;border:none;border-radius:var(--r);background:#F0F0F0;color:var(--text);font-family:'Baloo 2',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
-
-/* ── STATUS ── */
-#nfc-status{margin:10px 14px 0;padding:13px 16px;border-radius:13px;font-size:.85rem;font-weight:600;display:none;align-items:center;gap:10px;animation:si .3s ease;}
-@keyframes si{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-#nfc-status.ok{background:#EDFFF8;color:#00B894;border:1.5px solid #00B894;display:flex;}
-#nfc-status.warn{background:#FFF5F5;color:var(--retardo);border:1.5px solid var(--retardo);display:flex;}
-#nfc-status.info{background:#F4F3FF;color:var(--salida);border:1.5px solid var(--salida);display:flex;}
-
-/* ── TABS ── */
-.tabs{display:flex;margin:16px 14px 0;background:var(--card);border-radius:13px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);gap:3px;}
-.tab{flex:1;padding:9px 4px;border:none;background:transparent;border-radius:9px;font-family:'Nunito',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;color:var(--muted);white-space:nowrap;}
+/* TABS */
+.tabs{display:flex;margin:16px 14px 0;background:var(--card);border-radius:13px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);gap:2px;overflow-x:auto;}
+.tab{flex:1;min-width:52px;padding:9px 3px;border:none;background:transparent;border-radius:9px;font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:700;cursor:pointer;color:var(--muted);white-space:nowrap;}
 .tab.active{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(255,107,53,.35);}
 
-/* ── PANEL ── */
+/* PANELS */
 .panel{margin:12px 14px;display:none;}
 .panel.active{display:block;}
 
-/* ── STUDENT CARDS ── */
+/* STUDENT CARDS */
 .student-card{background:var(--card);border-radius:13px;padding:12px 14px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;border-left:4px solid var(--ausente);}
 .student-card.presente{border-left-color:var(--presente);}
 .student-card.retardo{border-left-color:var(--retardo);}
@@ -112,14 +111,68 @@ header p{color:rgba(255,255,255,.85);font-size:.82rem;margin-top:3px;}
 .student-actions{display:flex;gap:5px;flex-shrink:0;}
 .btn-sm{border:none;border-radius:8px;padding:6px 9px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
 .btn-baño{background:#EDE9FE;color:var(--salida);}
-.btn-manual{background:#E8F8F5;color:var(--presente);}
+.btn-mc{background:#E8F8F5;color:var(--presente);}
 .btn-reset{background:#FFF5F5;color:var(--retardo);}
 
-/* ── LOG ── */
+/* LOG */
 .log-entry{background:var(--card);border-radius:9px;padding:9px 13px;margin-bottom:7px;font-size:.8rem;display:flex;align-items:center;gap:10px;box-shadow:0 1px 6px rgba(0,0,0,.05);}
 .log-time{color:var(--muted);font-size:.68rem;margin-top:1px;}
 
-/* ── CHARTS ── */
+/* ══════════════════════════════
+   CALENDARIO DE SUSPENSIONES
+   ══════════════════════════════ */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-header h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;}
+.cal-nav{display:flex;gap:8px;align-items:center;}
+.cal-nav button{border:none;background:var(--bg);border-radius:9px;padding:7px 12px;font-size:.85rem;cursor:pointer;font-weight:700;}
+.cal-nav span{font-weight:700;font-size:.88rem;color:var(--primary);}
+
+/* Tipos de día especial */
+.tipos-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.tipo-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:.72rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .15s;opacity:.7;}
+.tipo-chip.selected{opacity:1;border-color:rgba(0,0,0,.2);}
+.tipo-dot{width:9px;height:9px;border-radius:50%;}
+
+/* Calendario grid */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px;}
+.cal-dow{text-align:center;font-size:.65rem;font-weight:800;color:var(--muted);padding:4px 0;}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;font-weight:700;position:relative;transition:all .15s;background:var(--bg);}
+.cal-day:hover{background:#EEE;}
+.cal-day.otro-mes{opacity:.3;cursor:default;}
+.cal-day.hoy{border:2px solid var(--primary);color:var(--primary);}
+.cal-day.finde{color:#CCC;cursor:default;}
+.cal-day.especial{color:#fff!important;}
+.cal-day .tipo-label{font-size:.45rem;font-weight:800;margin-top:1px;text-align:center;line-height:1;}
+
+/* Lista de días marcados */
+.dias-marcados{margin-top:4px;}
+.dia-marcado-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:10px;margin-bottom:6px;}
+.dia-marcado-info{display:flex;align-items:center;gap:10px;}
+.dia-marcado-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dia-marcado-texto{font-size:.82rem;font-weight:700;}
+.dia-marcado-sub{font-size:.7rem;color:var(--muted);}
+.dia-marcado-del{border:none;background:transparent;font-size:.9rem;cursor:pointer;padding:4px;}
+
+/* Modal día especial */
+#dia-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(3px);}
+#dia-modal.open{display:flex;}
+.dia-sheet{background:var(--card);border-radius:24px;padding:24px 20px;width:90%;max-width:380px;animation:su .3s ease;}
+@keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.dia-sheet h3{font-family:'Baloo 2',sans-serif;font-weight:800;margin-bottom:4px;font-size:1rem;}
+.dia-sheet .dia-fecha{font-size:.8rem;color:var(--muted);margin-bottom:16px;}
+.tipos-btns{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.tipo-btn{padding:12px 16px;border:2px solid #EEE;border-radius:12px;background:#fff;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all .15s;}
+.tipo-btn:hover{border-color:#CCC;}
+.tipo-btn.sel{color:#fff;}
+.dia-nota-label{font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;}
+.dia-nota{width:100%;padding:10px 12px;border:2px solid #EEE;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.85rem;outline:none;resize:none;}
+.dia-nota:focus{border-color:var(--primary);}
+.dia-btns{display:flex;gap:8px;margin-top:14px;}
+.dia-btn-ok{flex:1;padding:12px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-family:'Baloo 2',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;}
+.dia-btn-cancel{padding:12px 16px;border:2px solid #EEE;border-radius:12px;background:#fff;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;color:var(--muted);}
+.dia-btn-del{padding:12px 16px;border:none;border-radius:12px;background:#FFF0F0;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;color:var(--retardo);}
+
+/* CHARTS */
 .chart-card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
 .chart-title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:3px;}
 .chart-sub{font-size:.72rem;color:var(--muted);margin-bottom:12px;}
@@ -132,34 +185,23 @@ canvas{max-height:220px;}
 .rank-bar{height:100%;border-radius:5px;transition:width .8s ease;}
 .rank-val{font-weight:800;font-size:.78rem;width:22px;text-align:right;}
 
-/* ── EXPORT ── */
+/* EXPORT */
 #export-btn{margin:10px 14px 0;width:calc(100% - 28px);padding:14px;border:none;border-radius:13px;background:var(--accent);color:var(--text);font-family:'Baloo 2',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,230,109,.5);display:flex;align-items:center;justify-content:center;gap:8px;}
 
-/* ── MODAL MANUAL ── */
+/* MODAL MANUAL */
 #sim-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(3px);}
 #sim-modal.open{display:flex;}
-.sim-sheet{background:var(--card);border-radius:24px 24px 0 0;padding:22px 18px 38px;width:100%;max-width:480px;animation:su .3s ease;}
-@keyframes su{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sim-sheet{background:var(--card);border-radius:24px 24px 0 0;padding:22px 18px 38px;width:100%;max-width:480px;animation:su2 .3s ease;}
+@keyframes su2{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
 .sim-sheet h3{font-family:'Baloo 2',sans-serif;font-weight:800;margin-bottom:12px;font-size:1rem;}
 .sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:52vh;overflow-y:auto;}
-.sim-student{padding:9px 11px;border:2px solid var(--ausente);border-radius:11px;cursor:pointer;font-size:.78rem;font-weight:700;transition:all .15s;background:#fff;text-align:left;}
+.sim-student{padding:9px 11px;border:2px solid var(--ausente);border-radius:11px;cursor:pointer;font-size:.78rem;font-weight:700;background:#fff;text-align:left;}
 .sim-student:hover{border-color:var(--secondary);background:#F0FFFE;}
 .sim-cancel{width:100%;margin-top:12px;padding:12px;border:none;border-radius:11px;background:#F0F0F0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;}
 
-/* ── SECCIÓN CONFIGURAR NFC ── */
-.nfc-setup-card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
-.nfc-setup-card h3{font-family:'Baloo 2',sans-serif;font-weight:800;margin-bottom:10px;font-size:.95rem;}
-.alumno-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0F0F0;}
-.alumno-row:last-child{border-bottom:none;}
-.alumno-row span{font-size:.82rem;font-weight:700;}
-.alumno-row small{font-size:.7rem;color:var(--muted);display:block;}
-.copy-btn{padding:7px 12px;border:none;border-radius:9px;background:#EDE9FE;color:var(--salida);font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;}
-.copy-btn.copied{background:#EDFFF8;color:var(--presente);}
-
-/* ── PRINT ── */
+/* PRINT */
 @media print{
-  body{background:#fff;padding:0;}
-  header,#clock-bar,.stats,.nfc-zone,#nfc-status,.tabs,#panel-lista,#panel-log,#panel-config,#export-btn,#sim-modal,#flash-overlay{display:none!important;}
+  body>*:not(#panel-graficas){display:none!important;}
   #panel-graficas{display:block!important;margin:0;padding:20px;}
   .chart-card{box-shadow:none;border:1px solid #eee;page-break-inside:avoid;margin-bottom:18px;}
   .print-header{display:block!important;}
@@ -167,12 +209,11 @@ canvas{max-height:220px;}
 }
 .print-header{display:none;text-align:center;margin-bottom:18px;}
 .print-header h2{font-family:'Baloo 2',sans-serif;font-size:1.3rem;color:var(--primary);}
-.print-header p{font-size:.82rem;color:var(--muted);}
 </style>
 </head>
 <body>
 
-<!-- FLASH OVERLAY cuando llega alumno por NFC -->
+<!-- FLASH -->
 <div id="flash-overlay">
   <div id="flash-card">
     <div id="flash-icon">✅</div>
@@ -183,113 +224,21 @@ canvas{max-height:220px;}
   </div>
 </div>
 
-<header>
-  <div class="hico">🎒 📚 ✏️</div>
-  <h1>Lista de Asistencia</h1>
-  <p>Preescolar — Registro con NFC</p>
-</header>
-
-<div id="clock-bar">
-  <div>
-    <div class="time" id="clock">--:--:--</div>
-    <div class="date" id="date-label"></div>
-  </div>
-  <div id="retardo-badge">⚠️ RETARDO</div>
-</div>
-
-<div class="stats">
-  <div class="sc sp"><div class="num" id="cnt-p">0</div><div class="lbl">✅ Presentes</div></div>
-  <div class="sc sr"><div class="num" id="cnt-r">0</div><div class="lbl">⏰ Retardos</div></div>
-  <div class="sc sa"><div class="num" id="cnt-a">13</div><div class="lbl">❌ Ausentes</div></div>
-  <div class="sc sb"><div class="num" id="cnt-b">0</div><div class="lbl">🚻 Baño</div></div>
-</div>
-
-<div class="nfc-zone">
-  <div class="mode-toggle">
-    <button class="mbtn ae" id="btn-e" onclick="setMode('entrada')">✅ Registrar Entrada</button>
-    <button class="mbtn" id="btn-b" onclick="setMode('baño')">🚻 Salida al Baño</button>
-  </div>
-  <div class="nfc-info">
-    <h3>📡 Cómo usar las calcomanías NFC</h3>
-    <p>Selecciona el modo (Entrada o Baño) y acerca la mochila del alumno al celular. La app registra automáticamente.<br><br>
-    ¿No funciona aún? Ve a la pestaña <strong>⚙️ Config NFC</strong> para grabar correctamente las calcomanías.</p>
-  </div>
-  <button id="btn-manual-open" onclick="openModal()">👆 Registro Manual (sin NFC)</button>
-</div>
-
-<div id="nfc-status"></div>
-
-<div class="tabs">
-  <button class="tab active" onclick="showTab('lista')">📋 Hoy</button>
-  <button class="tab" onclick="showTab('log')">📜 Historial</button>
-  <button class="tab" onclick="showTab('graficas')">📊 Gráficas</button>
-  <button class="tab" onclick="showTab('config')">⚙️ Config NFC</button>
-</div>
-
-<div class="panel active" id="panel-lista"></div>
-<div class="panel" id="panel-log"></div>
-
-<!-- GRÁFICAS -->
-<div class="panel" id="panel-graficas">
-  <div class="print-header">
-    <h2>Reporte Mensual de Asistencia</h2>
-    <p id="print-subtitle"></p>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title">❌ Ranking de Faltas del Mes</div>
-    <div class="chart-sub">Quién acumula más ausencias</div>
-    <div class="rank-list" id="rank-faltas"></div>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title">⏰ Ranking de Retardos del Mes</div>
-    <div class="chart-sub">Quién llega tarde con más frecuencia</div>
-    <div class="rank-list" id="rank-retardos"></div>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title">🚻 Ranking de Salidas al Baño</div>
-    <div class="chart-sub">Quién sale más veces al baño este mes</div>
-    <div class="rank-list" id="rank-baños"></div>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title">📅 Asistencia por Alumno</div>
-    <div class="chart-sub">Días presentes vs ausentes este mes</div>
-    <canvas id="chartAsistencia"></canvas>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title">🏆 Puntualidad del Mes (%)</div>
-    <div class="chart-sub">Verde = bien · Amarillo = regular · Rojo = mejorar</div>
-    <canvas id="chartPuntualidad"></canvas>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title">📆 Ausencias por Día de la Semana</div>
-    <div class="chart-sub">¿Qué día falta más la clase?</div>
-    <canvas id="chartDias"></canvas>
+<!-- MODAL DÍA ESPECIAL -->
+<div id="dia-modal">
+  <div class="dia-sheet">
+    <h3>📅 Marcar día especial</h3>
+    <div class="dia-fecha" id="dia-modal-fecha"></div>
+    <div class="tipos-btns" id="tipos-btns"></div>
+    <div class="dia-nota-label">Nota u observación (opcional)</div>
+    <textarea class="dia-nota" id="dia-nota" rows="2" placeholder="Ej: Suspensión por junta de CTE..."></textarea>
+    <div class="dia-btns">
+      <button class="dia-btn-cancel" onclick="closeDiaModal()">Cancelar</button>
+      <button class="dia-btn-del" id="dia-btn-del" onclick="eliminarDiaEspecial()" style="display:none">🗑️</button>
+      <button class="dia-btn-ok" onclick="guardarDiaEspecial()">✅ Guardar</button>
+    </div>
   </div>
 </div>
-
-<!-- CONFIG NFC -->
-<div class="panel" id="panel-config">
-  <div class="nfc-setup-card">
-    <h3>📡 Cómo grabar las calcomanías NFC correctamente</h3>
-    <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6">
-      El problema que tenías es que Android abría el texto suelto en vez de registrar al alumno. 
-      La solución es grabar en cada calcomanía <strong>el nombre exacto del alumno como ID</strong>. 
-      Cuando acerques la calcomanía, la app lo intercepta y registra automáticamente.<br><br>
-      <strong>Pasos:</strong><br>
-      1️⃣ Abre <strong>NFC Tools</strong> en tu celular<br>
-      2️⃣ Toca <strong>"Escribir" → "Agregar registro" → "Texto"</strong><br>
-      3️⃣ Copia el texto del alumno (botón de abajo) y pégalo exactamente<br>
-      4️⃣ Toca <strong>"Escribir"</strong> y acerca la calcomanía<br>
-      5️⃣ Repite para cada alumno ✅
-    </p>
-  </div>
-  <div class="nfc-setup-card">
-    <h3>📋 Textos para grabar en cada calcomanía</h3>
-    <div id="config-lista"></div>
-  </div>
-</div>
-
-<button id="export-btn" onclick="exportPDF()">📄 Exportar Reporte PDF del Mes</button>
 
 <!-- MODAL MANUAL -->
 <div id="sim-modal">
@@ -300,106 +249,225 @@ canvas{max-height:220px;}
   </div>
 </div>
 
+<header>
+  <div style="font-size:2rem;margin-bottom:6px">🎒 📋 🔍</div>
+  <h1>Lista de Asistencia</h1>
+  <p>Preescolar — Escáner QR USB</p>
+</header>
+
+<div id="clock-bar">
+  <div>
+    <div class="time" id="clock">--:--:--</div>
+    <div class="date" id="date-label"></div>
+  </div>
+  <div id="retardo-badge">⚠️ RETARDO</div>
+</div>
+
+<!-- BANNER SUSPENSIÓN HOY -->
+<div id="susp-banner" style="margin-top:14px;">
+  <div class="susp-icon" id="susp-ico">🚫</div>
+  <div class="susp-text">
+    <div class="susp-title" id="susp-title">Día de suspensión</div>
+    <div class="susp-sub" id="susp-sub">No se cuenta como falta</div>
+  </div>
+  <button class="susp-quitar" onclick="quitarSuspHoy()">✕ Quitar</button>
+</div>
+
+<div class="stats">
+  <div class="sc sp"><div class="num" id="cnt-p">0</div><div class="lbl">✅ Presentes</div></div>
+  <div class="sc sr"><div class="num" id="cnt-r">0</div><div class="lbl">⏰ Retardos</div></div>
+  <div class="sc sa"><div class="num" id="cnt-a">13</div><div class="lbl">❌ Ausentes</div></div>
+  <div class="sc sb"><div class="num" id="cnt-b">0</div><div class="lbl">🚻 Baño</div></div>
+</div>
+
+<!-- SCANNER -->
+<div class="scanner-zone">
+  <div class="mode-toggle">
+    <button class="mbtn ae" id="btn-e" onclick="setMode('entrada')">✅ Entrada</button>
+    <button class="mbtn" id="btn-b" onclick="setMode('baño')">🚻 Baño</button>
+  </div>
+  <div class="scanner-box">
+    <h3>🔍 Escáner QR
+      <span class="scanner-active"><span class="dot"></span>Listo</span>
+    </h3>
+    <div class="scanner-input-wrap">
+      <input id="qr-input" type="text" placeholder="Apunta el escáner al gafete..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <span class="scan-ico">📡</span>
+    </div>
+    <div class="scanner-hint">Conecta el escáner QR por USB. Haz clic aquí y escanea el gafete del alumno — se registra en menos de 1 segundo. ⚡</div>
+    <button id="btn-manual" onclick="openModal()">👆 Registro Manual</button>
+  </div>
+</div>
+
+<div id="qr-status"></div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('lista')">📋 Hoy</button>
+  <button class="tab" onclick="showTab('log')">📜 Historial</button>
+  <button class="tab" onclick="showTab('graficas')">📊 Gráficas</button>
+  <button class="tab" onclick="showTab('calendario')">📅 Calendario</button>
+</div>
+
+<div class="panel active" id="panel-lista"></div>
+<div class="panel" id="panel-log"></div>
+
+<!-- GRÁFICAS -->
+<div class="panel" id="panel-graficas">
+  <div class="print-header"><h2>Reporte Mensual — Preescolar</h2><p id="print-subtitle"></p></div>
+  <div class="chart-card"><div class="chart-title">❌ Ranking de Faltas del Mes</div><div class="chart-sub">Solo días escolares normales — suspensiones y permisos excluidos</div><div class="rank-list" id="rank-faltas"></div></div>
+  <div class="chart-card"><div class="chart-title">⏰ Ranking de Retardos del Mes</div><div class="chart-sub">Quién llega tarde con más frecuencia</div><div class="rank-list" id="rank-retardos"></div></div>
+  <div class="chart-card"><div class="chart-title">🚻 Ranking de Salidas al Baño</div><div class="chart-sub">Quién sale más veces al baño</div><div class="rank-list" id="rank-baños"></div></div>
+  <div class="chart-card"><div class="chart-title">📅 Asistencia por Alumno</div><div class="chart-sub">Días presentes vs ausentes (sin contar suspensiones)</div><canvas id="chartA"></canvas></div>
+  <div class="chart-card"><div class="chart-title">🏆 Puntualidad del Mes (%)</div><div class="chart-sub">Verde ≥80% · Amarillo ≥60% · Rojo &lt;60%</div><canvas id="chartP"></canvas></div>
+  <div class="chart-card"><div class="chart-title">📆 Ausencias por Día de la Semana</div><div class="chart-sub">¿Qué día falta más la clase?</div><canvas id="chartD"></canvas></div>
+  <div class="chart-card"><div class="chart-title">🚫 Días sin Clase este Mes</div><div class="chart-sub">Suspensiones, vacaciones y permisos registrados</div><div id="resumen-especiales"></div></div>
+</div>
+
+<!-- CALENDARIO -->
+<div class="panel" id="panel-calendario">
+  <div style="background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:14px;">
+    <div class="cal-header">
+      <h3>📅 Días Sin Clase</h3>
+      <div class="cal-nav">
+        <button onclick="calMes(-1)">◀</button>
+        <span id="cal-titulo"></span>
+        <button onclick="calMes(1)">▶</button>
+      </div>
+    </div>
+    <!-- Leyenda de tipos -->
+    <div class="tipos-legend" id="tipos-legend"></div>
+    <!-- Grid -->
+    <div class="cal-grid" id="cal-grid"></div>
+    <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:4px;">Toca cualquier día para marcarlo como día especial</p>
+  </div>
+
+  <!-- Lista de días marcados -->
+  <div style="background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);">
+    <h3 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:12px;">📋 Días Registrados este Mes</h3>
+    <div class="dias-marcados" id="dias-marcados-lista"></div>
+  </div>
+</div>
+
+<button id="export-btn" onclick="exportPDF()">📄 Exportar Reporte PDF del Mes</button>
+
 <script>
+// ══════════════════════════════════════════════
+//  TIPOS DE DÍAS ESPECIALES
+// ══════════════════════════════════════════════
+const TIPOS = [
+  {id:'sep',   label:'Suspensión SEP',          icon:'🏫', color:'#FF6B35'},
+  {id:'vac',   label:'Vacaciones',               icon:'🌴', color:'#4ECDC4'},
+  {id:'reu',   label:'Reunión en Supervisión',   icon:'📋', color:'#A29BFE'},
+  {id:'per',   label:'Permiso Económico',        icon:'💼', color:'#F9CA24'},
+  {id:'inc',   label:'Incapacidad',              icon:'🏥', color:'#FF6B81'},
+];
+
 // ══════════════════════════════════════════════
 //  ALUMNOS
 // ══════════════════════════════════════════════
-const NOMBRES = [
-  "MANUEL YULIAM BONILLA DAMIAN","XIMENA DAMIAN TEPEPA",
-  "ISMAEL DE LA TRINIDAD SALAMANCA","ARIEL ROJAS XOCUA",
-  "JESUS SAID ROMERO ROJAS","DAYANA ANHELY TEPOLE DAMIAN",
-  "SANTIAGO TLAHUELE ROJAS","SALVADOR XOCUA BONILLA",
-  "MARIO ALDAIR DAMIAN TEPOLE","DIANA DE LA TRINIDAD LARA",
-  "DANIELA FLORES CHONCOHUA","CANDELARIA HERNANDEZ DAMIAN",
-  "CIRILO HERNANDEZ DAMIAN"
+const ALUMNOS = [
+  {id:'ALUMNO-01',nombre:'MANUEL YULIAM BONILLA DAMIAN'},
+  {id:'ALUMNO-02',nombre:'XIMENA DAMIAN TEPEPA'},
+  {id:'ALUMNO-03',nombre:'ISMAEL DE LA TRINIDAD SALAMANCA'},
+  {id:'ALUMNO-04',nombre:'ARIEL ROJAS XOCUA'},
+  {id:'ALUMNO-05',nombre:'JESUS SAID ROMERO ROJAS'},
+  {id:'ALUMNO-06',nombre:'DAYANA ANHELY TEPOLE DAMIAN'},
+  {id:'ALUMNO-07',nombre:'SANTIAGO TLAHUELE ROJAS'},
+  {id:'ALUMNO-08',nombre:'SALVADOR XOCUA BONILLA'},
+  {id:'ALUMNO-09',nombre:'MARIO ALDAIR DAMIAN TEPOLE'},
+  {id:'ALUMNO-10',nombre:'DIANA DE LA TRINIDAD LARA'},
+  {id:'ALUMNO-11',nombre:'DANIELA FLORES CHONCOHUA'},
+  {id:'ALUMNO-12',nombre:'CANDELARIA HERNANDEZ DAMIAN'},
+  {id:'ALUMNO-13',nombre:'CIRILO HERNANDEZ DAMIAN'},
 ];
 
-// El ID que se graba en la calcomanía NFC (texto plano, fácil de escribir)
-const NFC_IDS = NOMBRES.map((n,i)=>`ALUMNO-${String(i+1).padStart(2,'0')}`);
-
-const HORA_RET_H=9, HORA_RET_M=10;
+const HORA_RET_H=9,HORA_RET_M=10;
 let modoActual='entrada';
-let chartA=null,chartP=null,chartD=null;
+let cA=null,cP=null,cD=null;
+let calViewDate=new Date();
+let diaModalFecha=null;
+let tipoSeleccionado=null;
 
-let alumnos = NOMBRES.map((nombre,i)=>({
-  id:i, nombre, nfcID:NFC_IDS[i],
-  estado:'ausente', horaEntrada:null, salidasBaño:[], enBaño:false
-}));
+let alumnos=ALUMNOS.map(a=>({...a,estado:'ausente',horaEntrada:null,salidasBaño:[],enBaño:false}));
 let logHoy=[];
 
 // ══════════════════════════════════════════════
-//  INTERCEPTAR NFC AL CARGAR LA PÁGINA
-//  Cuando Android lee la calcomanía y abre la app,
-//  el texto queda en window.name o podemos usar
-//  la Web NFC API de forma pasiva con NDEFReader
+//  STORAGE
 // ══════════════════════════════════════════════
-function iniciarEscuchaNFC(){
-  if(!('NDEFReader' in window)) return;
-  try{
-    const reader = new NDEFReader();
-    // scan() sin interacción del usuario — funciona cuando la app está en primer plano
-    reader.scan().then(()=>{
-      reader.addEventListener('reading', ({message, serialNumber})=>{
-        // Leer todos los records del mensaje NFC
-        for(const record of message.records){
-          if(record.recordType === 'text'){
-            const decoder = new TextDecoder(record.encoding || 'utf-8');
-            const texto = decoder.decode(record.data).trim().toUpperCase();
-            manejarTextoNFC(texto);
-            break;
-          }
-          if(record.recordType === 'url'){
-            const decoder = new TextDecoder();
-            const url = decoder.decode(record.data);
-            // Extraer parámetro alumno de la URL
-            try{
-              const params = new URL(url).searchParams;
-              const id = params.get('alumno');
-              if(id) manejarTextoNFC(id.toUpperCase());
-            }catch(e){}
-            break;
-          }
-        }
-      });
-    }).catch(()=>{});
-  }catch(e){}
+function yyyymm(d){d=d||new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function hoy(){return new Date().toISOString().split('T')[0];}
+
+function cargarMes(ym){try{return JSON.parse(localStorage.getItem('asist_'+ym)||'{}');}catch{return {};}}
+function guardarDia(){
+  const ym=yyyymm();const mes=cargarMes(ym);
+  mes[hoy()]=alumnos.map(a=>({id:a.id,nombre:a.nombre,estado:a.estado,horaEntrada:a.horaEntrada,baños:a.salidasBaño.length}));
+  localStorage.setItem('asist_'+ym,JSON.stringify(mes));
 }
 
-function manejarTextoNFC(texto){
-  // Buscar por NFC_ID exacto (ALUMNO-01, ALUMNO-02, etc.)
-  let alumno = alumnos.find(a=> texto === a.nfcID || texto === a.nfcID.replace('-0','-').replace('-',''));
+// Días especiales
+function cargarEspeciales(){try{return JSON.parse(localStorage.getItem('especiales')||'{}');}catch{return {};}}
+function guardarEspeciales(obj){localStorage.setItem('especiales',JSON.stringify(obj));}
+function esDiaEspecial(fecha){const e=cargarEspeciales();return e[fecha]||null;}
+function setDiaEspecial(fecha,tipo,nota){
+  const e=cargarEspeciales();
+  if(tipo===null){delete e[fecha];}else{e[fecha]={tipo,nota};}
+  guardarEspeciales(e);
+}
 
-  // Si no, buscar por nombre completo (compatibilidad con calcomanías ya grabadas con nombre)
-  if(!alumno){
-    alumno = alumnos.find(a=>{
-      const nombreNorm = a.nombre.toUpperCase().replace(/\s+/g,' ').trim();
-      const textoNorm  = texto.toUpperCase().replace(/\s+/g,' ').trim();
-      return nombreNorm === textoNorm ||
-             nombreNorm.includes(textoNorm) ||
-             textoNorm.includes(nombreNorm.split(' ')[0]+' '+nombreNorm.split(' ')[1]);
-    });
-  }
-
-  if(alumno){
-    procesarAlumno(alumno);
+// ══════════════════════════════════════════════
+//  BANNER SUSPENSIÓN HOY
+// ══════════════════════════════════════════════
+function checkBannerHoy(){
+  const esp=esDiaEspecial(hoy());
+  const banner=document.getElementById('susp-banner');
+  if(esp){
+    const t=TIPOS.find(x=>x.id===esp.tipo)||TIPOS[0];
+    banner.style.background=t.color+'22';
+    banner.style.color=t.color;
+    banner.style.border=`1.5px solid ${t.color}`;
+    document.getElementById('susp-ico').textContent=t.icon;
+    document.getElementById('susp-title').textContent=t.label+(esp.nota?` — ${esp.nota}`:'');
+    document.getElementById('susp-sub').textContent='⚠️ Este día NO cuenta como falta en las estadísticas';
+    banner.classList.add('show');
+    // Deshabilitar escáner
+    document.getElementById('qr-input').disabled=true;
+    document.getElementById('qr-input').placeholder='Día sin clase — escáner desactivado';
   } else {
-    showStatus('warn',`⚠️ Calcomanía no reconocida: "${texto}"`);
+    banner.classList.remove('show');
+    document.getElementById('qr-input').disabled=false;
+    document.getElementById('qr-input').placeholder='Apunta el escáner al gafete...';
+  }
+}
+function quitarSuspHoy(){
+  if(confirm('¿Quitar el día especial de hoy? Volverá a contarse como día escolar.')){
+    setDiaEspecial(hoy(),null,null);
+    checkBannerHoy();
+    renderCalendario();
+    renderDiasMarcados();
   }
 }
 
 // ══════════════════════════════════════════════
-//  TAMBIÉN LEER DESDE URL (método más confiable)
-//  Si la calcomanía tiene grabada una URL tipo:
-//  asistencia.html?alumno=ALUMNO-01
+//  ESCÁNER QR
 // ══════════════════════════════════════════════
-function leerDesdeURL(){
-  const params = new URLSearchParams(window.location.search);
-  const alumnoParam = params.get('alumno');
-  if(alumnoParam){
-    // Limpiar la URL para no re-procesar al recargar
-    history.replaceState({}, '', window.location.pathname);
-    setTimeout(()=> manejarTextoNFC(alumnoParam.toUpperCase()), 500);
-  }
+const qrInput=document.getElementById('qr-input');
+setInterval(()=>{if(document.activeElement!==qrInput&&!document.getElementById('sim-modal').classList.contains('open')&&!document.getElementById('dia-modal').classList.contains('open')&&!qrInput.disabled)qrInput.focus();},800);
+document.addEventListener('click',e=>{if(!e.target.closest('#sim-modal')&&!e.target.closest('#dia-modal')&&!e.target.closest('.mbtn')&&!e.target.closest('#btn-manual')&&!qrInput.disabled)qrInput.focus();});
+
+let bufTimer=null;
+qrInput.addEventListener('input',()=>{
+  clearTimeout(bufTimer);
+  bufTimer=setTimeout(()=>{const v=qrInput.value.trim();if(v.length>=8){procesarQR(v);qrInput.value='';}},120);
+});
+qrInput.addEventListener('keydown',e=>{if(e.key==='Enter'){const v=qrInput.value.trim();if(v){procesarQR(v);qrInput.value='';};}});
+
+function procesarQR(texto){
+  if(esDiaEspecial(hoy())){showStatus('warn','🚫 Hoy es día sin clase — no se registra asistencia');return;}
+  let id=texto.toUpperCase();
+  if(texto.startsWith('http')){try{const u=new URL(texto);id=(u.searchParams.get('alumno')||'').toUpperCase();}catch(e){}}
+  const alumno=alumnos.find(a=>a.id===id);
+  if(alumno) procesarAlumno(alumno);
+  else showStatus('warn',`⚠️ Código no reconocido: "${id}"`);
 }
 
 // ══════════════════════════════════════════════
@@ -407,24 +475,20 @@ function leerDesdeURL(){
 // ══════════════════════════════════════════════
 function tick(){
   const now=new Date();
-  document.getElementById('clock').textContent=
-    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  document.getElementById('clock').textContent=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
   const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  document.getElementById('date-label').textContent=
-    `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('date-label').textContent=`${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} ${now.getFullYear()}`;
   const esR=now.getHours()>HORA_RET_H||(now.getHours()===HORA_RET_H&&now.getMinutes()>=HORA_RET_M);
   document.getElementById('retardo-badge').style.display=esR?'block':'none';
 }
-setInterval(tick,1000); tick();
+setInterval(tick,1000);tick();
 
-// ══════════════════════════════════════════════
-//  MODO
-// ══════════════════════════════════════════════
 function setMode(m){
   modoActual=m;
   document.getElementById('btn-e').className='mbtn'+(m==='entrada'?' ae':'');
   document.getElementById('btn-b').className='mbtn'+(m==='baño'?' ab':'');
+  if(!qrInput.disabled) qrInput.focus();
 }
 
 // ══════════════════════════════════════════════
@@ -434,43 +498,20 @@ function procesarAlumno(a){
   const now=new Date();
   const esR=now.getHours()>HORA_RET_H||(now.getHours()===HORA_RET_H&&now.getMinutes()>=HORA_RET_M);
   const hora=now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-
   if(modoActual==='entrada'){
-    if(a.estado!=='ausente'){
-      mostrarFlash('⚠️', a.nombre, 'Ya fue registrado hoy', hora, '#FF8C42');
-      return;
-    }
-    a.horaEntrada=hora;
-    a.estado=esR?'retardo':'presente';
-    const tipo=esR?'⏰ RETARDO':'✅ ENTRADA';
-    const color=esR?'#FF4757':'#2ED573';
-    mostrarFlash(esR?'⏰':'✅', a.nombre, tipo+' — '+hora, '', color);
+    if(a.estado!=='ausente'){mostrarFlash('⚠️',a.nombre,'Ya fue registrado hoy',hora,'#FF8C42');return;}
+    a.horaEntrada=hora;a.estado=esR?'retardo':'presente';
+    mostrarFlash(esR?'⏰':'✅',a.nombre,esR?'⏰ RETARDO':'✅ ENTRADA',hora,esR?'#FF4757':'#2ED573');
     addLog(esR?'⏰':'✅',a.nombre,`${esR?'RETARDO':'ENTRADA'} a las ${hora}`);
   } else {
-    if(a.estado==='ausente'){
-      mostrarFlash('⚠️',a.nombre,'No tiene entrada registrada',hora,'#FF8C42');
-      return;
-    }
-    if(a.enBaño){
-      a.enBaño=false;
-      const s=a.salidasBaño[a.salidasBaño.length-1];
-      if(s) s.regreso=hora;
-      mostrarFlash('🔙',a.nombre,'REGRESÓ DEL BAÑO',hora,'#A29BFE');
-      addLog('🔙',a.nombre,`Regresó del baño a las ${hora}`);
-    } else {
-      a.enBaño=true;
-      a.salidasBaño.push({salida:hora,regreso:null});
-      mostrarFlash('🚻',a.nombre,'SALIDA AL BAÑO',hora,'#A29BFE');
-      addLog('🚻',a.nombre,`Salida al baño a las ${hora}`);
-    }
+    if(a.estado==='ausente'){mostrarFlash('⚠️',a.nombre,'Sin entrada registrada',hora,'#FF8C42');return;}
+    if(a.enBaño){a.enBaño=false;const s=a.salidasBaño[a.salidasBaño.length-1];if(s)s.regreso=hora;mostrarFlash('🔙',a.nombre,'REGRESÓ DEL BAÑO',hora,'#A29BFE');addLog('🔙',a.nombre,`Regresó del baño ${hora}`);}
+    else{a.enBaño=true;a.salidasBaño.push({salida:hora,regreso:null});mostrarFlash('🚻',a.nombre,'SALIDA AL BAÑO',hora,'#A29BFE');addLog('🚻',a.nombre,`Salida al baño ${hora}`);}
   }
-  actualizarStats(); renderLista(); guardarDia();
+  actualizarStats();renderLista();guardarDia();
 }
 
-// ══════════════════════════════════════════════
-//  FLASH CARD (confirmación visual grande)
-// ══════════════════════════════════════════════
-function mostrarFlash(icon, nombre, tipo, hora, color){
+function mostrarFlash(icon,nombre,tipo,hora,color){
   document.getElementById('flash-icon').textContent=icon;
   document.getElementById('flash-name').textContent=nombre.split(' ').slice(0,2).join(' ');
   document.getElementById('flash-tipo').textContent=tipo;
@@ -478,45 +519,26 @@ function mostrarFlash(icon, nombre, tipo, hora, color){
   document.getElementById('flash-hora').textContent=hora?`🕐 ${hora}`:'';
   document.getElementById('flash-close').style.background=color;
   document.getElementById('flash-overlay').classList.add('show');
-  // Auto-cerrar después de 3 segundos
-  clearTimeout(window._flashTimer);
-  window._flashTimer=setTimeout(cerrarFlash,3000);
+  clearTimeout(window._ft);window._ft=setTimeout(cerrarFlash,3000);
 }
-function cerrarFlash(){
-  document.getElementById('flash-overlay').classList.remove('show');
-}
+function cerrarFlash(){document.getElementById('flash-overlay').classList.remove('show');if(!qrInput.disabled)qrInput.focus();}
 
-// ══════════════════════════════════════════════
-//  STATUS (pequeño)
-// ══════════════════════════════════════════════
 function showStatus(t,msg){
-  const el=document.getElementById('nfc-status');
-  el.className=t;
-  el.innerHTML=`<span>${t==='ok'?'✅':t==='warn'?'⚠️':'ℹ️'}</span><span>${msg}</span>`;
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>{el.className='';el.style.display='none';},5000);
+  const el=document.getElementById('qr-status');el.className=t;
+  el.innerHTML=`<span>${t==='ok'?'✅':'⚠️'}</span><span>${msg}</span>`;
+  clearTimeout(el._t);el._t=setTimeout(()=>{el.className='';el.style.display='none';},4000);
 }
 
-// ══════════════════════════════════════════════
-//  LOG
-// ══════════════════════════════════════════════
 function addLog(ico,nombre,desc){
   logHoy.unshift({ico,nombre,desc,ts:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})});
-  if(document.getElementById('panel-log').classList.contains('active')) renderLog();
+  if(document.getElementById('panel-log').classList.contains('active'))renderLog();
 }
 function renderLog(){
   const c=document.getElementById('panel-log');
   if(!logHoy.length){c.innerHTML='<p style="text-align:center;color:#B2BEC3;padding:20px;font-size:.85rem">Sin registros hoy</p>';return;}
-  c.innerHTML=logHoy.map(e=>`<div class="log-entry">
-    <span style="font-size:1.1rem">${e.ico}</span>
-    <div><div style="font-weight:700;font-size:.85rem">${e.nombre}</div>
-    <div class="log-time">${e.ts} — ${e.desc}</div></div>
-  </div>`).join('');
+  c.innerHTML=logHoy.map(e=>`<div class="log-entry"><span style="font-size:1.1rem">${e.ico}</span><div><div style="font-weight:700;font-size:.85rem">${e.nombre}</div><div class="log-time">${e.ts} — ${e.desc}</div></div></div>`).join('');
 }
 
-// ══════════════════════════════════════════════
-//  STATS
-// ══════════════════════════════════════════════
 function actualizarStats(){
   document.getElementById('cnt-p').textContent=alumnos.filter(a=>a.estado==='presente').length;
   document.getElementById('cnt-r').textContent=alumnos.filter(a=>a.estado==='retardo').length;
@@ -524,117 +546,178 @@ function actualizarStats(){
   document.getElementById('cnt-b').textContent=alumnos.filter(a=>a.enBaño).length;
 }
 
-// ══════════════════════════════════════════════
-//  LISTA
-// ══════════════════════════════════════════════
 function renderLista(){
   const c=document.getElementById('panel-lista');
-  c.innerHTML=alumnos.map(a=>{
+  c.innerHTML=alumnos.map((a,i)=>{
     const cls=a.enBaño?'en-baño':a.estado;
-    const badge=a.enBaño?'<span class="badge en-baño">🚻 En baño</span>':
-      a.estado==='presente'?'<span class="badge presente">✅ Presente</span>':
-      a.estado==='retardo'?'<span class="badge retardo">⏰ Retardo</span>':
-      '<span class="badge ausente">❌ Ausente</span>';
-    const sub=a.horaEntrada
-      ?`Entrada: ${a.horaEntrada}${a.salidasBaño.length?' · Baños: '+a.salidasBaño.length:''}`
-      :'Sin registro';
+    const badge=a.enBaño?'<span class="badge en-baño">🚻 En baño</span>':a.estado==='presente'?'<span class="badge presente">✅ Presente</span>':a.estado==='retardo'?'<span class="badge retardo">⏰ Retardo</span>':'<span class="badge ausente">❌ Ausente</span>';
+    const sub=a.horaEntrada?`Entrada: ${a.horaEntrada}${a.salidasBaño.length?' · Baños: '+a.salidasBaño.length:''}` :'Sin registro';
     const ini=a.nombre.split(' ').slice(0,2).map(p=>p[0]).join('');
-    return `<div class="student-card ${cls}">
-      <div class="avatar">${ini}</div>
-      <div class="student-info">
-        <div class="sname">${a.nombre}</div>
-        <div class="ssub">${sub}</div>${badge}
-      </div>
-      <div class="student-actions">
-        ${a.estado!=='ausente'?`<button class="btn-sm btn-baño" onclick="simBaño(${a.id})">${a.enBaño?'🔙':'🚻'}</button>`:''}
-        ${a.estado==='ausente'?`<button class="btn-sm btn-manual" onclick="simEntrada(${a.id})">＋</button>`:''}
-        ${a.estado!=='ausente'?`<button class="btn-sm btn-reset" onclick="resetA(${a.id})">↩</button>`:''}
-      </div>
-    </div>`;
+    return `<div class="student-card ${cls}"><div class="avatar">${ini}</div><div class="student-info"><div class="sname">${a.nombre}</div><div class="ssub">${sub}</div>${badge}</div><div class="student-actions">${a.estado!=='ausente'?`<button class="btn-sm btn-baño" onclick="simBaño(${i})">${a.enBaño?'🔙':'🚻'}</button>`:''} ${a.estado==='ausente'?`<button class="btn-sm btn-mc" onclick="simEntrada(${i})">＋</button>`:''} ${a.estado!=='ausente'?`<button class="btn-sm btn-reset" onclick="resetA(${i})">↩</button>`:''}</div></div>`;
   }).join('');
 }
-function simBaño(id){const p=modoActual;modoActual='baño';procesarAlumno(alumnos.find(x=>x.id===id));modoActual=p;}
-function simEntrada(id){const p=modoActual;modoActual='entrada';procesarAlumno(alumnos.find(x=>x.id===id));modoActual=p;}
-function resetA(id){const a=alumnos.find(x=>x.id===id);a.estado='ausente';a.horaEntrada=null;a.salidasBaño=[];a.enBaño=false;actualizarStats();renderLista();guardarDia();}
+function simBaño(i){const p=modoActual;modoActual='baño';procesarAlumno(alumnos[i]);modoActual=p;}
+function simEntrada(i){const p=modoActual;modoActual='entrada';procesarAlumno(alumnos[i]);modoActual=p;}
+function resetA(i){alumnos[i].estado='ausente';alumnos[i].horaEntrada=null;alumnos[i].salidasBaño=[];alumnos[i].enBaño=false;actualizarStats();renderLista();guardarDia();}
 
-// ══════════════════════════════════════════════
-//  MODAL MANUAL
-// ══════════════════════════════════════════════
 function openModal(){
   document.getElementById('sim-title').textContent=modoActual==='entrada'?'✅ Registrar Entrada':'🚻 Salida al Baño';
-  document.getElementById('sim-grid').innerHTML=alumnos.map(a=>
-    `<button class="sim-student" onclick="onSim(${a.id})">${a.nombre.split(' ').slice(0,2).join(' ')}</button>`).join('');
+  document.getElementById('sim-grid').innerHTML=alumnos.map((a,i)=>`<button class="sim-student" onclick="onSim(${i})">${a.nombre.split(' ').slice(0,2).join(' ')}</button>`).join('');
   document.getElementById('sim-modal').classList.add('open');
 }
-function closeModal(){document.getElementById('sim-modal').classList.remove('open');}
-function onSim(id){closeModal();procesarAlumno(alumnos.find(x=>x.id===id));}
-
-// ══════════════════════════════════════════════
-//  CONFIG NFC — lista de IDs para grabar
-// ══════════════════════════════════════════════
-function renderConfig(){
-  const c=document.getElementById('config-lista');
-  c.innerHTML=alumnos.map(a=>`
-    <div class="alumno-row">
-      <div>
-        <span>${a.nombre.split(' ').slice(0,2).join(' ')}</span>
-        <small style="color:var(--secondary);font-weight:700">Grabar en NFC Tools: <strong>${a.nfcID}</strong></small>
-      </div>
-      <button class="copy-btn" onclick="copiarID('${a.nfcID}',this)">📋 Copiar</button>
-    </div>
-  `).join('');
-}
-function copiarID(id, btn){
-  navigator.clipboard.writeText(id).then(()=>{
-    btn.textContent='✅ Copiado';
-    btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='📋 Copiar';btn.classList.remove('copied');},2000);
-  }).catch(()=>{
-    // fallback
-    const ta=document.createElement('textarea');
-    ta.value=id; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    btn.textContent='✅ Copiado'; btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='📋 Copiar';btn.classList.remove('copied');},2000);
-  });
-}
+function closeModal(){document.getElementById('sim-modal').classList.remove('open');if(!qrInput.disabled)qrInput.focus();}
+function onSim(i){closeModal();procesarAlumno(alumnos[i]);}
 
 // ══════════════════════════════════════════════
 //  TABS
 // ══════════════════════════════════════════════
 function showTab(tab){
-  const names=['lista','log','graficas','config'];
+  const names=['lista','log','graficas','calendario'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===tab));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+tab).classList.add('active');
-  if(tab==='graficas') renderGraficas();
-  if(tab==='log') renderLog();
-  if(tab==='config') renderConfig();
+  if(tab==='graficas')renderGraficas();
+  if(tab==='log')renderLog();
+  if(tab==='calendario'){renderCalendario();renderDiasMarcados();}
+  if(tab!=='graficas'&&!qrInput.disabled)setTimeout(()=>qrInput.focus(),100);
 }
 
 // ══════════════════════════════════════════════
-//  STORAGE MENSUAL
+//  CALENDARIO
 // ══════════════════════════════════════════════
-function yyyymm(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function hoy(){return new Date().toISOString().split('T')[0];}
-function cargarMes(){try{return JSON.parse(localStorage.getItem('asistencia_'+yyyymm())||'{}');}catch{return {};}}
-function guardarDia(){
-  const mes=cargarMes();
-  mes[hoy()]=alumnos.map(a=>({id:a.id,nombre:a.nombre,estado:a.estado,horaEntrada:a.horaEntrada,baños:a.salidasBaño.length}));
-  localStorage.setItem('asistencia_'+yyyymm(),JSON.stringify(mes));
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_CORTO=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function calMes(delta){calViewDate=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+delta,1);renderCalendario();renderDiasMarcados();}
+
+function renderCalendario(){
+  // Leyenda
+  document.getElementById('tipos-legend').innerHTML=TIPOS.map(t=>`
+    <div class="tipo-chip" style="background:${t.color}22;color:${t.color}">
+      <div class="tipo-dot" style="background:${t.color}"></div>${t.icon} ${t.label}
+    </div>`).join('');
+
+  // Título
+  document.getElementById('cal-titulo').textContent=`${MESES[calViewDate.getMonth()]} ${calViewDate.getFullYear()}`;
+
+  const especiales=cargarEspeciales();
+  const hoyStr=hoy();
+  const y=calViewDate.getFullYear(),m=calViewDate.getMonth();
+  const primerDia=new Date(y,m,1).getDay();
+  const diasMes=new Date(y,m+1,0).getDate();
+  const diasMesAnterior=new Date(y,m,0).getDate();
+
+  let html='';
+  DIAS_CORTO.forEach(d=>{html+=`<div class="cal-dow">${d}</div>`;});
+
+  // Días mes anterior
+  for(let i=primerDia-1;i>=0;i--){
+    html+=`<div class="cal-day otro-mes">${diasMesAnterior-i}</div>`;
+  }
+  // Días del mes
+  for(let d=1;d<=diasMes;d++){
+    const fecha=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow=new Date(y,m,d).getDay();
+    const esFinde=dow===0||dow===6;
+    const esp=especiales[fecha];
+    const esHoy=fecha===hoyStr;
+    let cls='cal-day';
+    let style='';
+    let extra='';
+    if(esFinde)cls+=' finde';
+    else if(esp){
+      const t=TIPOS.find(x=>x.id===esp.tipo)||TIPOS[0];
+      cls+=' especial';style=`background:${t.color};`;
+      extra=`<div class="tipo-label">${t.icon}</div>`;
+    }
+    if(esHoy)cls+=' hoy';
+    const clickable=!esFinde?`onclick="abrirDiaModal('${fecha}')"` :'';
+    html+=`<div class="${cls}" style="${style}" ${clickable}>${d}${extra}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
 }
+
+function renderDiasMarcados(){
+  const especiales=cargarEspeciales();
+  const ym=`${calViewDate.getFullYear()}-${String(calViewDate.getMonth()+1).padStart(2,'0')}`;
+  const delMes=Object.entries(especiales).filter(([f])=>f.startsWith(ym)).sort();
+  const c=document.getElementById('dias-marcados-lista');
+  if(!delMes.length){c.innerHTML='<p style="font-size:.82rem;color:#B2BEC3;text-align:center;padding:12px">No hay días marcados este mes</p>';return;}
+  c.innerHTML=delMes.map(([fecha,{tipo,nota}])=>{
+    const t=TIPOS.find(x=>x.id===tipo)||TIPOS[0];
+    const d=new Date(fecha+'T12:00:00');
+    const diasSem=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    const label=`${diasSem[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+    return `<div class="dia-marcado-row">
+      <div class="dia-marcado-info">
+        <div class="dia-marcado-color" style="background:${t.color}"></div>
+        <div><div class="dia-marcado-texto">${t.icon} ${t.label}</div>
+        <div class="dia-marcado-sub">${label}${nota?' — '+nota:''}</div></div>
+      </div>
+      <button class="dia-marcado-del" onclick="abrirDiaModal('${fecha}')">✏️</button>
+    </div>`;
+  }).join('');
+}
+
+// ── Modal día especial ──
+function abrirDiaModal(fecha){
+  diaModalFecha=fecha;
+  const esp=esDiaEspecial(fecha);
+  tipoSeleccionado=esp?esp.tipo:null;
+  const d=new Date(fecha+'T12:00:00');
+  const diasSem=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  document.getElementById('dia-modal-fecha').textContent=`${diasSem[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('dia-nota').value=esp?esp.nota||'':'';
+  document.getElementById('dia-btn-del').style.display=esp?'block':'none';
+  renderTiposBtns();
+  document.getElementById('dia-modal').classList.add('open');
+}
+function renderTiposBtns(){
+  document.getElementById('tipos-btns').innerHTML=TIPOS.map(t=>`
+    <button class="tipo-btn ${tipoSeleccionado===t.id?'sel':''}"
+      style="${tipoSeleccionado===t.id?`background:${t.color};border-color:${t.color};`:''}"
+      onclick="selTipo('${t.id}')">
+      <span style="font-size:1.2rem">${t.icon}</span> ${t.label}
+    </button>`).join('');
+}
+function selTipo(id){tipoSeleccionado=id;renderTiposBtns();}
+function closeDiaModal(){document.getElementById('dia-modal').classList.remove('open');diaModalFecha=null;tipoSeleccionado=null;}
+function guardarDiaEspecial(){
+  if(!tipoSeleccionado){alert('Selecciona un tipo de día');return;}
+  const nota=document.getElementById('dia-nota').value.trim();
+  setDiaEspecial(diaModalFecha,tipoSeleccionado,nota);
+  closeDiaModal();
+  renderCalendario();renderDiasMarcados();
+  if(diaModalFecha===hoy()||!diaModalFecha)checkBannerHoy();
+  checkBannerHoy();
+}
+function eliminarDiaEspecial(){
+  if(confirm('¿Quitar este día especial? Volverá a contarse como día escolar.')){
+    setDiaEspecial(diaModalFecha,null,null);
+    closeDiaModal();renderCalendario();renderDiasMarcados();checkBannerHoy();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ESTADÍSTICAS — excluyendo días especiales
+// ══════════════════════════════════════════════
 function statsDelMes(){
-  const mes=cargarMes();
+  const ym=yyyymm();
+  const mes=cargarMes(ym);
+  const especiales=cargarEspeciales();
   const stats={};
-  NOMBRES.forEach((n,i)=>{stats[i]={nombre:n,presentes:0,retardos:0,faltas:0,baños:0,diasEscolares:0};});
+  ALUMNOS.forEach(a=>{stats[a.id]={nombre:a.nombre,presentes:0,retardos:0,faltas:0,baños:0,diasEscolares:0};});
   const porDia={1:0,2:0,3:0,4:0,5:0};
+
   Object.entries(mes).forEach(([fecha,registros])=>{
+    // ← AQUÍ: si es día especial, se ignora completamente
+    if(especiales[fecha]) return;
     const dow=new Date(fecha+'T12:00:00').getDay();
     if(dow>=1&&dow<=5){
       Object.values(stats).forEach(s=>s.diasEscolares++);
       registros.forEach(r=>{
-        if(!stats[r.id]) return;
-        if(r.estado==='presente') stats[r.id].presentes++;
+        if(!stats[r.id])return;
+        if(r.estado==='presente')stats[r.id].presentes++;
         else if(r.estado==='retardo'){stats[r.id].retardos++;stats[r.id].presentes++;}
         else{stats[r.id].faltas++;porDia[dow]=(porDia[dow]||0)+1;}
         stats[r.id].baños+=(r.baños||0);
@@ -648,82 +731,79 @@ function statsDelMes(){
 //  GRÁFICAS
 // ══════════════════════════════════════════════
 function renderGraficas(){
-  const {stats,porDia}=statsDelMes();
+  const{stats,porDia}=statsDelMes();
   const now=new Date();
-  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  document.getElementById('print-subtitle').textContent=`${meses[now.getMonth()]} ${now.getFullYear()} — Preescolar`;
+  document.getElementById('print-subtitle').textContent=`${MESES[now.getMonth()]} ${now.getFullYear()} — Preescolar`;
   const arr=Object.values(stats);
   renderRanking('rank-faltas',[...arr].sort((a,b)=>b.faltas-a.faltas),'faltas','#FF4757');
   renderRanking('rank-retardos',[...arr].sort((a,b)=>b.retardos-a.retardos),'retardos','#FF4757');
   renderRanking('rank-baños',[...arr].sort((a,b)=>b.baños-a.baños),'baños','#A29BFE');
   const labels=arr.map(a=>a.nombre.split(' ')[0]);
-  if(chartA){chartA.destroy();chartA=null;}
-  chartA=new Chart(document.getElementById('chartAsistencia'),{
-    type:'bar',data:{labels,datasets:[
-      {label:'Presentes',data:arr.map(a=>a.presentes),backgroundColor:'rgba(46,213,115,.8)',borderRadius:4},
-      {label:'Faltas',data:arr.map(a=>a.faltas),backgroundColor:'rgba(180,180,180,.7)',borderRadius:4}
-    ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}
-  });
-  if(chartP){chartP.destroy();chartP=null;}
+  if(cA){cA.destroy();cA=null;}
+  cA=new Chart(document.getElementById('chartA'),{type:'bar',data:{labels,datasets:[
+    {label:'Presentes',data:arr.map(a=>a.presentes),backgroundColor:'rgba(46,213,115,.8)',borderRadius:4},
+    {label:'Faltas',data:arr.map(a=>a.faltas),backgroundColor:'rgba(180,180,180,.7)',borderRadius:4}
+  ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  if(cP){cP.destroy();cP=null;}
   const pct=arr.map(a=>{const d=a.diasEscolares||1;return Math.round(((a.presentes-a.retardos)/d)*100);});
-  chartP=new Chart(document.getElementById('chartPuntualidad'),{
-    type:'bar',data:{labels,datasets:[{label:'% Puntual',data:pct,
-      backgroundColor:pct.map(p=>p>=80?'rgba(46,213,115,.8)':p>=60?'rgba(255,230,109,.8)':'rgba(255,71,87,.8)'),borderRadius:4}]},
-    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:9}}}}}
-  });
-  if(chartD){chartD.destroy();chartD=null;}
-  chartD=new Chart(document.getElementById('chartDias'),{
-    type:'bar',data:{labels:['Lunes','Martes','Miércoles','Jueves','Viernes'],datasets:[{
-      label:'Ausencias',data:[1,2,3,4,5].map(d=>porDia[d]||0),backgroundColor:'rgba(162,155,254,.8)',borderRadius:5}]},
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}
-  });
-}
-function renderRanking(elId,sorted,campo,color){
-  const max=sorted[0]?sorted[0][campo]:1;
-  document.getElementById(elId).innerHTML=sorted.map((a,i)=>{
-    const val=a[campo]||0;
-    const pct=max>0?Math.round((val/max)*100):0;
-    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
-    return `<div class="rank-item">
-      <div class="rank-num">${medal}</div>
-      <div class="rank-name">${a.nombre.split(' ').slice(0,2).join(' ')}</div>
-      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${color}"></div></div>
-      <div class="rank-val" style="color:${color}">${val}</div>
+  cP=new Chart(document.getElementById('chartP'),{type:'bar',data:{labels,datasets:[{label:'% Puntual',data:pct,backgroundColor:pct.map(p=>p>=80?'rgba(46,213,115,.8)':p>=60?'rgba(255,230,109,.8)':'rgba(255,71,87,.8)'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:9}}}}}});
+  if(cD){cD.destroy();cD=null;}
+  cD=new Chart(document.getElementById('chartD'),{type:'bar',data:{labels:['Lunes','Martes','Miércoles','Jueves','Viernes'],datasets:[{label:'Ausencias',data:[1,2,3,4,5].map(d=>porDia[d]||0),backgroundColor:'rgba(162,155,254,.8)',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+
+  // Resumen días especiales
+  const ym=yyyymm();
+  const especiales=cargarEspeciales();
+  const delMes=Object.entries(especiales).filter(([f])=>f.startsWith(ym));
+  const resumen=document.getElementById('resumen-especiales');
+  if(!delMes.length){resumen.innerHTML='<p style="font-size:.82rem;color:#B2BEC3;text-align:center;padding:12px">Sin días especiales registrados este mes</p>';return;}
+  const conteo={};
+  delMes.forEach(([,{tipo}])=>{conteo[tipo]=(conteo[tipo]||0)+1;});
+  resumen.innerHTML=Object.entries(conteo).map(([id,n])=>{
+    const t=TIPOS.find(x=>x.id===id)||TIPOS[0];
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${t.color}18;border-radius:10px;margin-bottom:8px;">
+      <span style="font-size:1.3rem">${t.icon}</span>
+      <div><div style="font-weight:700;font-size:.85rem;color:${t.color}">${t.label}</div>
+      <div style="font-size:.72rem;color:var(--muted)">${n} día${n>1?'s':''} este mes</div></div>
     </div>`;
   }).join('');
 }
 
+function renderRanking(elId,sorted,campo,color){
+  const max=sorted[0]?sorted[0][campo]:1;
+  document.getElementById(elId).innerHTML=sorted.map((a,i)=>{
+    const val=a[campo]||0,pct=max>0?Math.round((val/max)*100):0;
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+    return `<div class="rank-item"><div class="rank-num">${medal}</div><div class="rank-name">${a.nombre.split(' ').slice(0,2).join(' ')}</div><div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${color}"></div></div><div class="rank-val" style="color:${color}">${val}</div></div>`;
+  }).join('');
+}
+
+function exportPDF(){renderGraficas();showTab('graficas');setTimeout(()=>window.print(),600);}
+
 // ══════════════════════════════════════════════
-//  EXPORT PDF
+//  LEER URL (compatibilidad NFC)
 // ══════════════════════════════════════════════
-function exportPDF(){
-  renderGraficas();showTab('graficas');
-  setTimeout(()=>window.print(),600);
+function leerURL(){
+  const p=new URLSearchParams(window.location.search).get('alumno');
+  if(p){history.replaceState({},'',window.location.pathname);setTimeout(()=>procesarQR(p),500);}
 }
 
 // ══════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════
-renderLista();
-actualizarStats();
-renderLog();
-iniciarEscuchaNFC();   // escucha NFC pasiva en segundo plano
-leerDesdeURL();        // procesa si viene de calcomanía con URL
+renderLista();actualizarStats();renderLog();checkBannerHoy();leerURL();
+qrInput.focus();
 
 // Demo data
 (function seedDemo(){
-  if(Object.keys(cargarMes()).length>0) return;
+  if(Object.keys(cargarMes(yyyymm())).length>0)return;
   const mes={};const now=new Date();
   for(let d=1;d<now.getDate();d++){
     const fecha=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dow=new Date(fecha+'T12:00:00').getDay();
-    if(dow===0||dow===6) continue;
-    mes[fecha]=NOMBRES.map((n,i)=>{
-      const r=Math.random();
-      return{id:i,nombre:n,estado:r<0.08?'ausente':r<0.2?'retardo':'presente',horaEntrada:r<0.08?null:'8:30',baños:Math.floor(Math.random()*3)};
-    });
+    if(dow===0||dow===6)continue;
+    mes[fecha]=ALUMNOS.map(a=>{const r=Math.random();return{id:a.id,nombre:a.nombre,estado:r<0.08?'ausente':r<0.2?'retardo':'presente',horaEntrada:r<0.08?null:'8:30',baños:Math.floor(Math.random()*3)};});
   }
-  localStorage.setItem('asistencia_'+yyyymm(),JSON.stringify(mes));
+  localStorage.setItem('asist_'+yyyymm(),JSON.stringify(mes));
 })();
 </script>
 </body>
