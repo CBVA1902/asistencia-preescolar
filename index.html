@@ -199,6 +199,40 @@ canvas{max-height:220px;}
 .sim-student:hover{border-color:var(--secondary);background:#F0FFFE;}
 .sim-cancel{width:100%;margin-top:12px;padding:12px;border:none;border-radius:11px;background:#F0F0F0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;}
 
+/* ══════════════════════════════
+   CAPTURA DE DÍAS PASADOS
+   ══════════════════════════════ */
+.pasado-header{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:12px;}
+.pasado-header h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:12px;}
+.fecha-selector{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.fecha-selector label{font-size:.8rem;font-weight:700;color:var(--muted);}
+#pasado-fecha{padding:10px 14px;border:2px solid #EEE;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:700;color:var(--text);outline:none;flex:1;max-width:200px;}
+#pasado-fecha:focus{border-color:var(--primary);}
+#btn-cargar-pasado{padding:10px 18px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-family:'Baloo 2',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;}
+.pasado-aviso{font-size:.75rem;color:var(--muted);margin-top:8px;padding:8px 12px;background:var(--bg);border-radius:8px;line-height:1.5;}
+
+.pasado-lista{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:12px;display:none;}
+.pasado-lista h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:4px;}
+.pasado-lista .sub{font-size:.75rem;color:var(--muted);margin-bottom:14px;}
+.pasado-actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.pasado-btn-all{padding:8px 14px;border:2px solid var(--presente);border-radius:10px;background:#F0FFF8;color:var(--presente);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;}
+.pasado-btn-none{padding:8px 14px;border:2px solid #DDD;border-radius:10px;background:#FFF;color:var(--muted);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;}
+
+.pasado-alumno{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F5F5F5;}
+.pasado-alumno:last-child{border-bottom:none;}
+.pasado-nombre{flex:1;font-size:.84rem;font-weight:700;}
+.pasado-toggle{display:flex;gap:6px;}
+.ptbtn{padding:7px 12px;border:2px solid #EEE;border-radius:9px;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;background:#fff;transition:all .15s;}
+.ptbtn.p-sel{background:var(--presente);border-color:var(--presente);color:#fff;}
+.ptbtn.r-sel{background:var(--retardo);border-color:var(--retardo);color:#fff;}
+.ptbtn.a-sel{background:#DDD;border-color:#CCC;color:#888;}
+
+.pasado-guardar{width:100%;padding:14px;border:none;border-radius:13px;background:var(--presente);color:#fff;font-family:'Baloo 2',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 4px 14px rgba(46,213,115,.35);}
+.pasado-ok{background:var(--card);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);text-align:center;display:none;}
+.pasado-ok .ok-ico{font-size:3rem;margin-bottom:8px;}
+.pasado-ok h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;margin-bottom:6px;}
+.pasado-ok p{font-size:.82rem;color:var(--muted);}
+
 /* PRINT */
 @media print{
   body>*:not(#panel-graficas){display:none!important;}
@@ -306,6 +340,7 @@ canvas{max-height:220px;}
   <button class="tab" onclick="showTab('log')">📜 Historial</button>
   <button class="tab" onclick="showTab('graficas')">📊 Gráficas</button>
   <button class="tab" onclick="showTab('calendario')">📅 Calendario</button>
+  <button class="tab" onclick="showTab('pasado')">✏️ Captura</button>
 </div>
 
 <div class="panel active" id="panel-lista"></div>
@@ -345,6 +380,41 @@ canvas{max-height:220px;}
   <div style="background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);">
     <h3 style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:12px;">📋 Días Registrados este Mes</h3>
     <div class="dias-marcados" id="dias-marcados-lista"></div>
+  </div>
+</div>
+
+<!-- PANEL CAPTURA PASADA -->
+<div class="panel" id="panel-pasado">
+  <div class="pasado-header">
+    <h3>✏️ Capturar Asistencia de Días Pasados</h3>
+    <div class="fecha-selector">
+      <label>Selecciona la fecha:</label>
+      <input type="date" id="pasado-fecha">
+      <button id="btn-cargar-pasado" onclick="cargarDiaPasado()">Ver lista</button>
+    </div>
+    <div class="pasado-aviso">
+      💡 Puedes capturar o corregir la asistencia de cualquier día anterior.
+      Si el día ya tenía registros, aparecerán precargados para que los edites.
+    </div>
+  </div>
+
+  <div class="pasado-lista" id="pasado-lista">
+    <h3 id="pasado-lista-titulo">Asistencia del día</h3>
+    <div class="sub">Marca el estado de cada alumno: <strong style="color:var(--presente)">P</strong>=Presente · <strong style="color:var(--retardo)">R</strong>=Retardo · <strong style="color:#999">F</strong>=Falta</div>
+    <div class="pasado-actions">
+      <button class="pasado-btn-all" onclick="marcarTodos('presente')">✅ Todos Presentes</button>
+      <button class="pasado-btn-all" style="border-color:var(--retardo);background:#FFF0F0;color:var(--retardo)" onclick="marcarTodos('retardo')">⏰ Todos Retardo</button>
+      <button class="pasado-btn-none" onclick="marcarTodos('ausente')">❌ Todos Falta</button>
+    </div>
+    <div id="pasado-alumnos-lista"></div>
+    <button class="pasado-guardar" onclick="guardarDiaPasado()">💾 Guardar Asistencia</button>
+  </div>
+
+  <div class="pasado-ok" id="pasado-ok">
+    <div class="ok-ico">✅</div>
+    <h3 id="pasado-ok-titulo">¡Asistencia guardada!</h3>
+    <p id="pasado-ok-sub">Los datos ya aparecen en las gráficas del mes.</p>
+    <button style="margin-top:14px;padding:10px 24px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;cursor:pointer;font-size:.9rem;" onclick="nuevaCaptura()">📅 Capturar otro día</button>
   </div>
 </div>
 
@@ -572,7 +642,7 @@ function onSim(i){closeModal();procesarAlumno(alumnos[i]);}
 //  TABS
 // ══════════════════════════════════════════════
 function showTab(tab){
-  const names=['lista','log','graficas','calendario'];
+  const names=['lista','log','graficas','calendario','pasado'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===tab));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+tab).classList.add('active');
@@ -780,8 +850,117 @@ function renderRanking(elId,sorted,campo,color){
 function exportPDF(){renderGraficas();showTab('graficas');setTimeout(()=>window.print(),600);}
 
 // ══════════════════════════════════════════════
-//  LEER URL (compatibilidad NFC)
+//  CAPTURA DE DÍAS PASADOS
 // ══════════════════════════════════════════════
+let pasadoEstados = {}; // id -> 'presente'|'retardo'|'ausente'
+
+function cargarDiaPasado(){
+  const fecha = document.getElementById('pasado-fecha').value;
+  if(!fecha){alert('Selecciona una fecha');return;}
+  const hoyStr = hoy();
+  if(fecha >= hoyStr){alert('Solo puedes capturar días anteriores a hoy');return;}
+  const dow = new Date(fecha+'T12:00:00').getDay();
+  if(dow===0||dow===6){alert('Ese día es sábado o domingo');return;}
+  const esp = esDiaEspecial(fecha);
+  if(esp){
+    const t=TIPOS.find(x=>x.id===esp.tipo)||TIPOS[0];
+    if(!confirm(`⚠️ Ese día está marcado como "${t.label}". ¿Igualmente quieres capturar asistencia?`)) return;
+  }
+
+  // Cargar registros existentes si hay
+  const ym = fecha.slice(0,7).replace('-','').slice(0,4)+'-'+fecha.slice(5,7);
+  const mes = cargarMes(fecha.slice(0,7).replace('-0','-').slice(0,7));
+  const registrosExistentes = (cargarMes(fecha.slice(0,7)))[fecha] || [];
+
+  pasadoEstados = {};
+  ALUMNOS.forEach(a=>{
+    const reg = registrosExistentes.find(r=>r.id===a.id);
+    pasadoEstados[a.id] = reg ? reg.estado : 'presente';
+  });
+
+  // Título
+  const d = new Date(fecha+'T12:00:00');
+  const diasSem=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const mesesN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('pasado-lista-titulo').textContent =
+    `📋 ${diasSem[d.getDay()]} ${d.getDate()} de ${mesesN[d.getMonth()]} ${d.getFullYear()}`;
+
+  renderPasadoAlumnos();
+  document.getElementById('pasado-lista').style.display='block';
+  document.getElementById('pasado-ok').style.display='none';
+}
+
+function renderPasadoAlumnos(){
+  const c = document.getElementById('pasado-alumnos-lista');
+  c.innerHTML = ALUMNOS.map(a=>{
+    const est = pasadoEstados[a.id]||'presente';
+    const ini = a.nombre.split(' ').slice(0,2).map(p=>p[0]).join('');
+    return `<div class="pasado-alumno">
+      <div class="avatar" style="background:${est==='presente'?'var(--presente)':est==='retardo'?'var(--retardo)':'var(--ausente)'};width:36px;height:36px;font-size:.9rem">${ini}</div>
+      <div class="pasado-nombre">${a.nombre.split(' ').slice(0,2).join(' ')}<br><span style="font-size:.68rem;color:var(--muted);font-weight:400">${a.nombre.split(' ').slice(2).join(' ')}</span></div>
+      <div class="pasado-toggle">
+        <button class="ptbtn ${est==='presente'?'p-sel':''}" onclick="setPasado('${a.id}','presente')">P</button>
+        <button class="ptbtn ${est==='retardo'?'r-sel':''}" onclick="setPasado('${a.id}','retardo')">R</button>
+        <button class="ptbtn ${est==='ausente'?'a-sel':''}" onclick="setPasado('${a.id}','ausente')">F</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setPasado(id, estado){
+  pasadoEstados[id] = estado;
+  renderPasadoAlumnos();
+}
+
+function marcarTodos(estado){
+  ALUMNOS.forEach(a=>{ pasadoEstados[a.id]=estado; });
+  renderPasadoAlumnos();
+}
+
+function guardarDiaPasado(){
+  const fecha = document.getElementById('pasado-fecha').value;
+  if(!fecha) return;
+  const ym = fecha.slice(0,7);
+  const mes = cargarMes(ym);
+  mes[fecha] = ALUMNOS.map(a=>({
+    id:a.id, nombre:a.nombre,
+    estado: pasadoEstados[a.id]||'presente',
+    horaEntrada: pasadoEstados[a.id]!=='ausente'?'08:00':null,
+    baños: 0
+  }));
+  localStorage.setItem('asist_'+ym, JSON.stringify(mes));
+
+  // Mostrar confirmación
+  const presentes = Object.values(pasadoEstados).filter(e=>e==='presente').length;
+  const retardos  = Object.values(pasadoEstados).filter(e=>e==='retardo').length;
+  const ausentes  = Object.values(pasadoEstados).filter(e=>e==='ausente').length;
+  const d = new Date(fecha+'T12:00:00');
+  const mesesN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('pasado-ok-titulo').textContent = `✅ Guardado: ${d.getDate()} de ${mesesN[d.getMonth()]}`;
+  document.getElementById('pasado-ok-sub').textContent =
+    `✅ Presentes: ${presentes} · ⏰ Retardos: ${retardos} · ❌ Faltas: ${ausentes}`;
+  document.getElementById('pasado-lista').style.display='none';
+  document.getElementById('pasado-ok').style.display='block';
+}
+
+function nuevaCaptura(){
+  document.getElementById('pasado-lista').style.display='none';
+  document.getElementById('pasado-ok').style.display='none';
+  document.getElementById('pasado-fecha').value='';
+  pasadoEstados={};
+}
+
+// Poner fecha máxima de hoy en el selector
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp = document.getElementById('pasado-fecha');
+  if(inp){
+    const ayer = new Date(); ayer.setDate(ayer.getDate()-1);
+    inp.max = ayer.toISOString().split('T')[0];
+    inp.value = ayer.toISOString().split('T')[0];
+  }
+});
+
+
 function leerURL(){
   const p=new URLSearchParams(window.location.search).get('alumno');
   if(p){history.replaceState({},'',window.location.pathname);setTimeout(()=>procesarQR(p),500);}
