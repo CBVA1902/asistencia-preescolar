@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Asistencia Preescolar</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#FFF8F0;--card:#fff;--primary:#FF6B35;
+  --secondary:#4ECDC4;--accent:#FFE66D;--retardo:#FF4757;--salida:#A29BFE;
+  --presente:#2ED573;--ausente:#DFE6E9;
+  --text:#2D3436;--muted:#636E72;--shadow:0 4px 20px rgba(0,0,0,.10);--r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:70px;}
+
+/* ── FLASH DE REGISTRO (aparece cuando llega alumno por NFC) ── */
+#flash-overlay{
+  position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:rgba(0,0,0,0);pointer-events:none;transition:background .2s;
+}
+#flash-overlay.show{background:rgba(0,0,0,.6);pointer-events:all;}
+#flash-card{
+  background:var(--card);border-radius:28px;padding:36px 32px;text-align:center;
+  width:88%;max-width:340px;transform:scale(.7);opacity:0;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+#flash-overlay.show #flash-card{transform:scale(1);opacity:1;}
+#flash-icon{font-size:4rem;margin-bottom:10px;}
+#flash-name{font-family:'Baloo 2',sans-serif;font-size:1.5rem;font-weight:800;line-height:1.2;margin-bottom:6px;}
+#flash-tipo{font-size:1rem;font-weight:700;margin-bottom:20px;}
+#flash-hora{font-size:.85rem;color:var(--muted);}
+#flash-close{
+  margin-top:20px;padding:12px 32px;border:none;border-radius:14px;
+  background:var(--primary);color:#fff;font-family:'Baloo 2',sans-serif;
+  font-size:1rem;font-weight:800;cursor:pointer;width:100%;
+}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,var(--primary),#FF8C42);padding:22px 20px 56px;position:relative;overflow:hidden;}
+header::after{content:'';position:absolute;bottom:-28px;left:0;right:0;height:56px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0;}
+header h1{font-family:'Baloo 2',sans-serif;font-size:1.7rem;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.15);}
+header p{color:rgba(255,255,255,.85);font-size:.82rem;margin-top:3px;}
+.hico{font-size:2rem;margin-bottom:6px;}
+
+/* ── CLOCK ── */
+#clock-bar{display:flex;justify-content:space-between;align-items:center;background:var(--card);margin:-18px 14px 0;padding:12px 18px;border-radius:var(--r);box-shadow:var(--shadow);position:relative;z-index:2;}
+.time{font-family:'Baloo 2',sans-serif;font-size:1.5rem;font-weight:800;color:var(--primary);}
+.date{font-size:.75rem;color:var(--muted);}
+#retardo-badge{background:var(--retardo);color:#fff;font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:20px;display:none;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 14px 0;}
+.sc{background:var(--card);border-radius:13px;padding:11px 5px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.sc .num{font-family:'Baloo 2',sans-serif;font-size:1.4rem;font-weight:800;line-height:1;}
+.sc .lbl{font-size:.6rem;color:var(--muted);margin-top:2px;font-weight:700;}
+.sc.sp .num{color:var(--presente)}.sc.sr .num{color:var(--retardo)}
+.sc.sa .num{color:#B2BEC3}.sc.sb .num{color:var(--salida)}
+
+/* ── MODO ── */
+.nfc-zone{margin:16px 14px 0;display:flex;flex-direction:column;gap:10px;}
+.mode-toggle{display:flex;gap:8px;}
+.mbtn{flex:1;padding:10px 6px;border:2px solid transparent;border-radius:12px;background:var(--card);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s;}
+.mbtn.ae{border-color:var(--presente);color:var(--presente);background:#F0FFF8;}
+.mbtn.ab{border-color:var(--salida);color:var(--salida);background:#F4F3FF;}
+
+/* ── INSTRUCCIÓN NFC ── */
+.nfc-info{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);border-left:4px solid var(--secondary);}
+.nfc-info h3{font-family:'Baloo 2',sans-serif;font-size:1rem;font-weight:800;margin-bottom:6px;color:var(--secondary);}
+.nfc-info p{font-size:.8rem;color:var(--muted);line-height:1.5;}
+
+/* ── BOTÓN MANUAL ── */
+#btn-manual-open{width:100%;padding:14px;border:none;border-radius:var(--r);background:#F0F0F0;color:var(--text);font-family:'Baloo 2',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* ── STATUS ── */
+#nfc-status{margin:10px 14px 0;padding:13px 16px;border-radius:13px;font-size:.85rem;font-weight:600;display:none;align-items:center;gap:10px;animation:si .3s ease;}
+@keyframes si{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+#nfc-status.ok{background:#EDFFF8;color:#00B894;border:1.5px solid #00B894;display:flex;}
+#nfc-status.warn{background:#FFF5F5;color:var(--retardo);border:1.5px solid var(--retardo);display:flex;}
+#nfc-status.info{background:#F4F3FF;color:var(--salida);border:1.5px solid var(--salida);display:flex;}
+
+/* ── TABS ── */
+.tabs{display:flex;margin:16px 14px 0;background:var(--card);border-radius:13px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06);gap:3px;}
+.tab{flex:1;padding:9px 4px;border:none;background:transparent;border-radius:9px;font-family:'Nunito',sans-serif;font-size:.73rem;font-weight:700;cursor:pointer;color:var(--muted);white-space:nowrap;}
+.tab.active{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(255,107,53,.35);}
+
+/* ── PANEL ── */
+.panel{margin:12px 14px;display:none;}
+.panel.active{display:block;}
+
+/* ── STUDENT CARDS ── */
+.student-card{background:var(--card);border-radius:13px;padding:12px 14px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;border-left:4px solid var(--ausente);}
+.student-card.presente{border-left-color:var(--presente);}
+.student-card.retardo{border-left-color:var(--retardo);}
+.student-card.en-baño{border-left-color:var(--salida);}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;font-weight:900;background:var(--ausente);color:#fff;}
+.student-card.presente .avatar{background:var(--presente);}
+.student-card.retardo .avatar{background:var(--retardo);}
+.student-card.en-baño .avatar{background:var(--salida);}
+.student-info{flex:1;min-width:0;}
+.sname{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ssub{font-size:.68rem;color:var(--muted);margin-top:2px;}
+.badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:10px;display:inline-block;margin-top:3px;}
+.badge.presente{background:#EDFFF8;color:var(--presente);}
+.badge.retardo{background:#FFF0F0;color:var(--retardo);}
+.badge.en-baño{background:#EDE9FE;color:var(--salida);}
+.badge.ausente{background:#F0F0F0;color:#B2BEC3;}
+.student-actions{display:flex;gap:5px;flex-shrink:0;}
+.btn-sm{border:none;border-radius:8px;padding:6px 9px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+.btn-baño{background:#EDE9FE;color:var(--salida);}
+.btn-manual{background:#E8F8F5;color:var(--presente);}
+.btn-reset{background:#FFF5F5;color:var(--retardo);}
+
+/* ── LOG ── */
+.log-entry{background:var(--card);border-radius:9px;padding:9px 13px;margin-bottom:7px;font-size:.8rem;display:flex;align-items:center;gap:10px;box-shadow:0 1px 6px rgba(0,0,0,.05);}
+.log-time{color:var(--muted);font-size:.68rem;margin-top:1px;}
+
+/* ── CHARTS ── */
+.chart-card{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.chart-title{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:3px;}
+.chart-sub{font-size:.72rem;color:var(--muted);margin-bottom:12px;}
+canvas{max-height:220px;}
+.rank-list{display:flex;flex-direction:column;gap:7px;margin-top:8px;}
+.rank-item{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:10px;padding:8px 11px;}
+.rank-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;width:22px;text-align:center;}
+.rank-name{min-width:80px;font-size:.76rem;font-weight:700;}
+.rank-bar-wrap{flex:1;height:9px;background:#EAEAEA;border-radius:5px;overflow:hidden;}
+.rank-bar{height:100%;border-radius:5px;transition:width .8s ease;}
+.rank-val{font-weight:800;font-size:.78rem;width:22px;text-align:right;}
+
+/* ── EXPORT ── */
+#export-btn{margin:10px 14px 0;width:calc(100% - 28px);padding:14px;border:none;border-radius:13px;background:var(--accent);color:var(--text);font-family:'Baloo 2',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(255,230,109,.5);display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* ── MODAL MANUAL ── */
+#sim-modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(3px);}
+#sim-modal.open{display:flex;}
+.sim-sheet{background:var(--card);border-radius:24px 24px 0 0;padding:22px 18px 38px;width:100%;max-width:480px;animation:su .3s ease;}
+@keyframes su{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sim-sheet h3{font-family:'Baloo 2',sans-serif;font-weight:800;margin-bottom:12px;font-size:1rem;}
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:52vh;overflow-y:auto;}
+.sim-student{padding:9px 11px;border:2px solid var(--ausente);border-radius:11px;cursor:pointer;font-size:.78rem;font-weight:700;transition:all .15s;background:#fff;text-align:left;}
+.sim-student:hover{border-color:var(--secondary);background:#F0FFFE;}
+.sim-cancel{width:100%;margin-top:12px;padding:12px;border:none;border-radius:11px;background:#F0F0F0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;}
+
+/* ── SECCIÓN CONFIGURAR NFC ── */
+.nfc-setup-card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);}
+.nfc-setup-card h3{font-family:'Baloo 2',sans-serif;font-weight:800;margin-bottom:10px;font-size:.95rem;}
+.alumno-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0F0F0;}
+.alumno-row:last-child{border-bottom:none;}
+.alumno-row span{font-size:.82rem;font-weight:700;}
+.alumno-row small{font-size:.7rem;color:var(--muted);display:block;}
+.copy-btn{padding:7px 12px;border:none;border-radius:9px;background:#EDE9FE;color:var(--salida);font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.copy-btn.copied{background:#EDFFF8;color:var(--presente);}
+
+/* ── PRINT ── */
+@media print{
+  body{background:#fff;padding:0;}
+  header,#clock-bar,.stats,.nfc-zone,#nfc-status,.tabs,#panel-lista,#panel-log,#panel-config,#export-btn,#sim-modal,#flash-overlay{display:none!important;}
+  #panel-graficas{display:block!important;margin:0;padding:20px;}
+  .chart-card{box-shadow:none;border:1px solid #eee;page-break-inside:avoid;margin-bottom:18px;}
+  .print-header{display:block!important;}
+  canvas{max-height:280px!important;}
+}
+.print-header{display:none;text-align:center;margin-bottom:18px;}
+.print-header h2{font-family:'Baloo 2',sans-serif;font-size:1.3rem;color:var(--primary);}
+.print-header p{font-size:.82rem;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<!-- FLASH OVERLAY cuando llega alumno por NFC -->
+<div id="flash-overlay">
+  <div id="flash-card">
+    <div id="flash-icon">✅</div>
+    <div id="flash-name">NOMBRE</div>
+    <div id="flash-tipo">ENTRADA REGISTRADA</div>
+    <div id="flash-hora"></div>
+    <button id="flash-close" onclick="cerrarFlash()">✓ Continuar</button>
+  </div>
+</div>
+
+<header>
+  <div class="hico">🎒 📚 ✏️</div>
+  <h1>Lista de Asistencia</h1>
+  <p>Preescolar — Registro con NFC</p>
+</header>
+
+<div id="clock-bar">
+  <div>
+    <div class="time" id="clock">--:--:--</div>
+    <div class="date" id="date-label"></div>
+  </div>
+  <div id="retardo-badge">⚠️ RETARDO</div>
+</div>
+
+<div class="stats">
+  <div class="sc sp"><div class="num" id="cnt-p">0</div><div class="lbl">✅ Presentes</div></div>
+  <div class="sc sr"><div class="num" id="cnt-r">0</div><div class="lbl">⏰ Retardos</div></div>
+  <div class="sc sa"><div class="num" id="cnt-a">13</div><div class="lbl">❌ Ausentes</div></div>
+  <div class="sc sb"><div class="num" id="cnt-b">0</div><div class="lbl">🚻 Baño</div></div>
+</div>
+
+<div class="nfc-zone">
+  <div class="mode-toggle">
+    <button class="mbtn ae" id="btn-e" onclick="setMode('entrada')">✅ Registrar Entrada</button>
+    <button class="mbtn" id="btn-b" onclick="setMode('baño')">🚻 Salida al Baño</button>
+  </div>
+  <div class="nfc-info">
+    <h3>📡 Cómo usar las calcomanías NFC</h3>
+    <p>Selecciona el modo (Entrada o Baño) y acerca la mochila del alumno al celular. La app registra automáticamente.<br><br>
+    ¿No funciona aún? Ve a la pestaña <strong>⚙️ Config NFC</strong> para grabar correctamente las calcomanías.</p>
+  </div>
+  <button id="btn-manual-open" onclick="openModal()">👆 Registro Manual (sin NFC)</button>
+</div>
+
+<div id="nfc-status"></div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('lista')">📋 Hoy</button>
+  <button class="tab" onclick="showTab('log')">📜 Historial</button>
+  <button class="tab" onclick="showTab('graficas')">📊 Gráficas</button>
+  <button class="tab" onclick="showTab('config')">⚙️ Config NFC</button>
+</div>
+
+<div class="panel active" id="panel-lista"></div>
+<div class="panel" id="panel-log"></div>
+
+<!-- GRÁFICAS -->
+<div class="panel" id="panel-graficas">
+  <div class="print-header">
+    <h2>Reporte Mensual de Asistencia</h2>
+    <p id="print-subtitle"></p>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">❌ Ranking de Faltas del Mes</div>
+    <div class="chart-sub">Quién acumula más ausencias</div>
+    <div class="rank-list" id="rank-faltas"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">⏰ Ranking de Retardos del Mes</div>
+    <div class="chart-sub">Quién llega tarde con más frecuencia</div>
+    <div class="rank-list" id="rank-retardos"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">🚻 Ranking de Salidas al Baño</div>
+    <div class="chart-sub">Quién sale más veces al baño este mes</div>
+    <div class="rank-list" id="rank-baños"></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">📅 Asistencia por Alumno</div>
+    <div class="chart-sub">Días presentes vs ausentes este mes</div>
+    <canvas id="chartAsistencia"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">🏆 Puntualidad del Mes (%)</div>
+    <div class="chart-sub">Verde = bien · Amarillo = regular · Rojo = mejorar</div>
+    <canvas id="chartPuntualidad"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">📆 Ausencias por Día de la Semana</div>
+    <div class="chart-sub">¿Qué día falta más la clase?</div>
+    <canvas id="chartDias"></canvas>
+  </div>
+</div>
+
+<!-- CONFIG NFC -->
+<div class="panel" id="panel-config">
+  <div class="nfc-setup-card">
+    <h3>📡 Cómo grabar las calcomanías NFC correctamente</h3>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6">
+      El problema que tenías es que Android abría el texto suelto en vez de registrar al alumno. 
+      La solución es grabar en cada calcomanía <strong>el nombre exacto del alumno como ID</strong>. 
+      Cuando acerques la calcomanía, la app lo intercepta y registra automáticamente.<br><br>
+      <strong>Pasos:</strong><br>
+      1️⃣ Abre <strong>NFC Tools</strong> en tu celular<br>
+      2️⃣ Toca <strong>"Escribir" → "Agregar registro" → "Texto"</strong><br>
+      3️⃣ Copia el texto del alumno (botón de abajo) y pégalo exactamente<br>
+      4️⃣ Toca <strong>"Escribir"</strong> y acerca la calcomanía<br>
+      5️⃣ Repite para cada alumno ✅
+    </p>
+  </div>
+  <div class="nfc-setup-card">
+    <h3>📋 Textos para grabar en cada calcomanía</h3>
+    <div id="config-lista"></div>
+  </div>
+</div>
+
+<button id="export-btn" onclick="exportPDF()">📄 Exportar Reporte PDF del Mes</button>
+
+<!-- MODAL MANUAL -->
+<div id="sim-modal">
+  <div class="sim-sheet">
+    <h3 id="sim-title">👆 Selecciona alumno</h3>
+    <div class="sim-grid" id="sim-grid"></div>
+    <button class="sim-cancel" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ALUMNOS
+// ══════════════════════════════════════════════
+const NOMBRES = [
+  "MANUEL YULIAM BONILLA DAMIAN","XIMENA DAMIAN TEPEPA",
+  "ISMAEL DE LA TRINIDAD SALAMANCA","ARIEL ROJAS XOCUA",
+  "JESUS SAID ROMERO ROJAS","DAYANA ANHELY TEPOLE DAMIAN",
+  "SANTIAGO TLAHUELE ROJAS","SALVADOR XOCUA BONILLA",
+  "MARIO ALDAIR DAMIAN TEPOLE","DIANA DE LA TRINIDAD LARA",
+  "DANIELA FLORES CHONCOHUA","CANDELARIA HERNANDEZ DAMIAN",
+  "CIRILO HERNANDEZ DAMIAN"
+];
+
+// El ID que se graba en la calcomanía NFC (texto plano, fácil de escribir)
+const NFC_IDS = NOMBRES.map((n,i)=>`ALUMNO-${String(i+1).padStart(2,'0')}`);
+
+const HORA_RET_H=9, HORA_RET_M=10;
+let modoActual='entrada';
+let chartA=null,chartP=null,chartD=null;
+
+let alumnos = NOMBRES.map((nombre,i)=>({
+  id:i, nombre, nfcID:NFC_IDS[i],
+  estado:'ausente', horaEntrada:null, salidasBaño:[], enBaño:false
+}));
+let logHoy=[];
+
+// ══════════════════════════════════════════════
+//  INTERCEPTAR NFC AL CARGAR LA PÁGINA
+//  Cuando Android lee la calcomanía y abre la app,
+//  el texto queda en window.name o podemos usar
+//  la Web NFC API de forma pasiva con NDEFReader
+// ══════════════════════════════════════════════
+function iniciarEscuchaNFC(){
+  if(!('NDEFReader' in window)) return;
+  try{
+    const reader = new NDEFReader();
+    // scan() sin interacción del usuario — funciona cuando la app está en primer plano
+    reader.scan().then(()=>{
+      reader.addEventListener('reading', ({message, serialNumber})=>{
+        // Leer todos los records del mensaje NFC
+        for(const record of message.records){
+          if(record.recordType === 'text'){
+            const decoder = new TextDecoder(record.encoding || 'utf-8');
+            const texto = decoder.decode(record.data).trim().toUpperCase();
+            manejarTextoNFC(texto);
+            break;
+          }
+          if(record.recordType === 'url'){
+            const decoder = new TextDecoder();
+            const url = decoder.decode(record.data);
+            // Extraer parámetro alumno de la URL
+            try{
+              const params = new URL(url).searchParams;
+              const id = params.get('alumno');
+              if(id) manejarTextoNFC(id.toUpperCase());
+            }catch(e){}
+            break;
+          }
+        }
+      });
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+function manejarTextoNFC(texto){
+  // Buscar por NFC_ID exacto (ALUMNO-01, ALUMNO-02, etc.)
+  let alumno = alumnos.find(a=> texto === a.nfcID || texto === a.nfcID.replace('-0','-').replace('-',''));
+
+  // Si no, buscar por nombre completo (compatibilidad con calcomanías ya grabadas con nombre)
+  if(!alumno){
+    alumno = alumnos.find(a=>{
+      const nombreNorm = a.nombre.toUpperCase().replace(/\s+/g,' ').trim();
+      const textoNorm  = texto.toUpperCase().replace(/\s+/g,' ').trim();
+      return nombreNorm === textoNorm ||
+             nombreNorm.includes(textoNorm) ||
+             textoNorm.includes(nombreNorm.split(' ')[0]+' '+nombreNorm.split(' ')[1]);
+    });
+  }
+
+  if(alumno){
+    procesarAlumno(alumno);
+  } else {
+    showStatus('warn',`⚠️ Calcomanía no reconocida: "${texto}"`);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  TAMBIÉN LEER DESDE URL (método más confiable)
+//  Si la calcomanía tiene grabada una URL tipo:
+//  asistencia.html?alumno=ALUMNO-01
+// ══════════════════════════════════════════════
+function leerDesdeURL(){
+  const params = new URLSearchParams(window.location.search);
+  const alumnoParam = params.get('alumno');
+  if(alumnoParam){
+    // Limpiar la URL para no re-procesar al recargar
+    history.replaceState({}, '', window.location.pathname);
+    setTimeout(()=> manejarTextoNFC(alumnoParam.toUpperCase()), 500);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  RELOJ
+// ══════════════════════════════════════════════
+function tick(){
+  const now=new Date();
+  document.getElementById('clock').textContent=
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('date-label').textContent=
+    `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} ${now.getFullYear()}`;
+  const esR=now.getHours()>HORA_RET_H||(now.getHours()===HORA_RET_H&&now.getMinutes()>=HORA_RET_M);
+  document.getElementById('retardo-badge').style.display=esR?'block':'none';
+}
+setInterval(tick,1000); tick();
+
+// ══════════════════════════════════════════════
+//  MODO
+// ══════════════════════════════════════════════
+function setMode(m){
+  modoActual=m;
+  document.getElementById('btn-e').className='mbtn'+(m==='entrada'?' ae':'');
+  document.getElementById('btn-b').className='mbtn'+(m==='baño'?' ab':'');
+}
+
+// ══════════════════════════════════════════════
+//  PROCESAR ALUMNO
+// ══════════════════════════════════════════════
+function procesarAlumno(a){
+  const now=new Date();
+  const esR=now.getHours()>HORA_RET_H||(now.getHours()===HORA_RET_H&&now.getMinutes()>=HORA_RET_M);
+  const hora=now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+
+  if(modoActual==='entrada'){
+    if(a.estado!=='ausente'){
+      mostrarFlash('⚠️', a.nombre, 'Ya fue registrado hoy', hora, '#FF8C42');
+      return;
+    }
+    a.horaEntrada=hora;
+    a.estado=esR?'retardo':'presente';
+    const tipo=esR?'⏰ RETARDO':'✅ ENTRADA';
+    const color=esR?'#FF4757':'#2ED573';
+    mostrarFlash(esR?'⏰':'✅', a.nombre, tipo+' — '+hora, '', color);
+    addLog(esR?'⏰':'✅',a.nombre,`${esR?'RETARDO':'ENTRADA'} a las ${hora}`);
+  } else {
+    if(a.estado==='ausente'){
+      mostrarFlash('⚠️',a.nombre,'No tiene entrada registrada',hora,'#FF8C42');
+      return;
+    }
+    if(a.enBaño){
+      a.enBaño=false;
+      const s=a.salidasBaño[a.salidasBaño.length-1];
+      if(s) s.regreso=hora;
+      mostrarFlash('🔙',a.nombre,'REGRESÓ DEL BAÑO',hora,'#A29BFE');
+      addLog('🔙',a.nombre,`Regresó del baño a las ${hora}`);
+    } else {
+      a.enBaño=true;
+      a.salidasBaño.push({salida:hora,regreso:null});
+      mostrarFlash('🚻',a.nombre,'SALIDA AL BAÑO',hora,'#A29BFE');
+      addLog('🚻',a.nombre,`Salida al baño a las ${hora}`);
+    }
+  }
+  actualizarStats(); renderLista(); guardarDia();
+}
+
+// ══════════════════════════════════════════════
+//  FLASH CARD (confirmación visual grande)
+// ══════════════════════════════════════════════
+function mostrarFlash(icon, nombre, tipo, hora, color){
+  document.getElementById('flash-icon').textContent=icon;
+  document.getElementById('flash-name').textContent=nombre.split(' ').slice(0,2).join(' ');
+  document.getElementById('flash-tipo').textContent=tipo;
+  document.getElementById('flash-tipo').style.color=color;
+  document.getElementById('flash-hora').textContent=hora?`🕐 ${hora}`:'';
+  document.getElementById('flash-close').style.background=color;
+  document.getElementById('flash-overlay').classList.add('show');
+  // Auto-cerrar después de 3 segundos
+  clearTimeout(window._flashTimer);
+  window._flashTimer=setTimeout(cerrarFlash,3000);
+}
+function cerrarFlash(){
+  document.getElementById('flash-overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  STATUS (pequeño)
+// ══════════════════════════════════════════════
+function showStatus(t,msg){
+  const el=document.getElementById('nfc-status');
+  el.className=t;
+  el.innerHTML=`<span>${t==='ok'?'✅':t==='warn'?'⚠️':'ℹ️'}</span><span>${msg}</span>`;
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{el.className='';el.style.display='none';},5000);
+}
+
+// ══════════════════════════════════════════════
+//  LOG
+// ══════════════════════════════════════════════
+function addLog(ico,nombre,desc){
+  logHoy.unshift({ico,nombre,desc,ts:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})});
+  if(document.getElementById('panel-log').classList.contains('active')) renderLog();
+}
+function renderLog(){
+  const c=document.getElementById('panel-log');
+  if(!logHoy.length){c.innerHTML='<p style="text-align:center;color:#B2BEC3;padding:20px;font-size:.85rem">Sin registros hoy</p>';return;}
+  c.innerHTML=logHoy.map(e=>`<div class="log-entry">
+    <span style="font-size:1.1rem">${e.ico}</span>
+    <div><div style="font-weight:700;font-size:.85rem">${e.nombre}</div>
+    <div class="log-time">${e.ts} — ${e.desc}</div></div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════
+function actualizarStats(){
+  document.getElementById('cnt-p').textContent=alumnos.filter(a=>a.estado==='presente').length;
+  document.getElementById('cnt-r').textContent=alumnos.filter(a=>a.estado==='retardo').length;
+  document.getElementById('cnt-a').textContent=alumnos.filter(a=>a.estado==='ausente').length;
+  document.getElementById('cnt-b').textContent=alumnos.filter(a=>a.enBaño).length;
+}
+
+// ══════════════════════════════════════════════
+//  LISTA
+// ══════════════════════════════════════════════
+function renderLista(){
+  const c=document.getElementById('panel-lista');
+  c.innerHTML=alumnos.map(a=>{
+    const cls=a.enBaño?'en-baño':a.estado;
+    const badge=a.enBaño?'<span class="badge en-baño">🚻 En baño</span>':
+      a.estado==='presente'?'<span class="badge presente">✅ Presente</span>':
+      a.estado==='retardo'?'<span class="badge retardo">⏰ Retardo</span>':
+      '<span class="badge ausente">❌ Ausente</span>';
+    const sub=a.horaEntrada
+      ?`Entrada: ${a.horaEntrada}${a.salidasBaño.length?' · Baños: '+a.salidasBaño.length:''}`
+      :'Sin registro';
+    const ini=a.nombre.split(' ').slice(0,2).map(p=>p[0]).join('');
+    return `<div class="student-card ${cls}">
+      <div class="avatar">${ini}</div>
+      <div class="student-info">
+        <div class="sname">${a.nombre}</div>
+        <div class="ssub">${sub}</div>${badge}
+      </div>
+      <div class="student-actions">
+        ${a.estado!=='ausente'?`<button class="btn-sm btn-baño" onclick="simBaño(${a.id})">${a.enBaño?'🔙':'🚻'}</button>`:''}
+        ${a.estado==='ausente'?`<button class="btn-sm btn-manual" onclick="simEntrada(${a.id})">＋</button>`:''}
+        ${a.estado!=='ausente'?`<button class="btn-sm btn-reset" onclick="resetA(${a.id})">↩</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function simBaño(id){const p=modoActual;modoActual='baño';procesarAlumno(alumnos.find(x=>x.id===id));modoActual=p;}
+function simEntrada(id){const p=modoActual;modoActual='entrada';procesarAlumno(alumnos.find(x=>x.id===id));modoActual=p;}
+function resetA(id){const a=alumnos.find(x=>x.id===id);a.estado='ausente';a.horaEntrada=null;a.salidasBaño=[];a.enBaño=false;actualizarStats();renderLista();guardarDia();}
+
+// ══════════════════════════════════════════════
+//  MODAL MANUAL
+// ══════════════════════════════════════════════
+function openModal(){
+  document.getElementById('sim-title').textContent=modoActual==='entrada'?'✅ Registrar Entrada':'🚻 Salida al Baño';
+  document.getElementById('sim-grid').innerHTML=alumnos.map(a=>
+    `<button class="sim-student" onclick="onSim(${a.id})">${a.nombre.split(' ').slice(0,2).join(' ')}</button>`).join('');
+  document.getElementById('sim-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('sim-modal').classList.remove('open');}
+function onSim(id){closeModal();procesarAlumno(alumnos.find(x=>x.id===id));}
+
+// ══════════════════════════════════════════════
+//  CONFIG NFC — lista de IDs para grabar
+// ══════════════════════════════════════════════
+function renderConfig(){
+  const c=document.getElementById('config-lista');
+  c.innerHTML=alumnos.map(a=>`
+    <div class="alumno-row">
+      <div>
+        <span>${a.nombre.split(' ').slice(0,2).join(' ')}</span>
+        <small style="color:var(--secondary);font-weight:700">Grabar en NFC Tools: <strong>${a.nfcID}</strong></small>
+      </div>
+      <button class="copy-btn" onclick="copiarID('${a.nfcID}',this)">📋 Copiar</button>
+    </div>
+  `).join('');
+}
+function copiarID(id, btn){
+  navigator.clipboard.writeText(id).then(()=>{
+    btn.textContent='✅ Copiado';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 Copiar';btn.classList.remove('copied');},2000);
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=id; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent='✅ Copiado'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 Copiar';btn.classList.remove('copied');},2000);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function showTab(tab){
+  const names=['lista','log','graficas','config'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  if(tab==='graficas') renderGraficas();
+  if(tab==='log') renderLog();
+  if(tab==='config') renderConfig();
+}
+
+// ══════════════════════════════════════════════
+//  STORAGE MENSUAL
+// ══════════════════════════════════════════════
+function yyyymm(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function hoy(){return new Date().toISOString().split('T')[0];}
+function cargarMes(){try{return JSON.parse(localStorage.getItem('asistencia_'+yyyymm())||'{}');}catch{return {};}}
+function guardarDia(){
+  const mes=cargarMes();
+  mes[hoy()]=alumnos.map(a=>({id:a.id,nombre:a.nombre,estado:a.estado,horaEntrada:a.horaEntrada,baños:a.salidasBaño.length}));
+  localStorage.setItem('asistencia_'+yyyymm(),JSON.stringify(mes));
+}
+function statsDelMes(){
+  const mes=cargarMes();
+  const stats={};
+  NOMBRES.forEach((n,i)=>{stats[i]={nombre:n,presentes:0,retardos:0,faltas:0,baños:0,diasEscolares:0};});
+  const porDia={1:0,2:0,3:0,4:0,5:0};
+  Object.entries(mes).forEach(([fecha,registros])=>{
+    const dow=new Date(fecha+'T12:00:00').getDay();
+    if(dow>=1&&dow<=5){
+      Object.values(stats).forEach(s=>s.diasEscolares++);
+      registros.forEach(r=>{
+        if(!stats[r.id]) return;
+        if(r.estado==='presente') stats[r.id].presentes++;
+        else if(r.estado==='retardo'){stats[r.id].retardos++;stats[r.id].presentes++;}
+        else{stats[r.id].faltas++;porDia[dow]=(porDia[dow]||0)+1;}
+        stats[r.id].baños+=(r.baños||0);
+      });
+    }
+  });
+  return{stats,porDia};
+}
+
+// ══════════════════════════════════════════════
+//  GRÁFICAS
+// ══════════════════════════════════════════════
+function renderGraficas(){
+  const {stats,porDia}=statsDelMes();
+  const now=new Date();
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('print-subtitle').textContent=`${meses[now.getMonth()]} ${now.getFullYear()} — Preescolar`;
+  const arr=Object.values(stats);
+  renderRanking('rank-faltas',[...arr].sort((a,b)=>b.faltas-a.faltas),'faltas','#FF4757');
+  renderRanking('rank-retardos',[...arr].sort((a,b)=>b.retardos-a.retardos),'retardos','#FF4757');
+  renderRanking('rank-baños',[...arr].sort((a,b)=>b.baños-a.baños),'baños','#A29BFE');
+  const labels=arr.map(a=>a.nombre.split(' ')[0]);
+  if(chartA){chartA.destroy();chartA=null;}
+  chartA=new Chart(document.getElementById('chartAsistencia'),{
+    type:'bar',data:{labels,datasets:[
+      {label:'Presentes',data:arr.map(a=>a.presentes),backgroundColor:'rgba(46,213,115,.8)',borderRadius:4},
+      {label:'Faltas',data:arr.map(a=>a.faltas),backgroundColor:'rgba(180,180,180,.7)',borderRadius:4}
+    ]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{stepSize:1}}}}
+  });
+  if(chartP){chartP.destroy();chartP=null;}
+  const pct=arr.map(a=>{const d=a.diasEscolares||1;return Math.round(((a.presentes-a.retardos)/d)*100);});
+  chartP=new Chart(document.getElementById('chartPuntualidad'),{
+    type:'bar',data:{labels,datasets:[{label:'% Puntual',data:pct,
+      backgroundColor:pct.map(p=>p>=80?'rgba(46,213,115,.8)':p>=60?'rgba(255,230,109,.8)':'rgba(255,71,87,.8)'),borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:9}}}}}
+  });
+  if(chartD){chartD.destroy();chartD=null;}
+  chartD=new Chart(document.getElementById('chartDias'),{
+    type:'bar',data:{labels:['Lunes','Martes','Miércoles','Jueves','Viernes'],datasets:[{
+      label:'Ausencias',data:[1,2,3,4,5].map(d=>porDia[d]||0),backgroundColor:'rgba(162,155,254,.8)',borderRadius:5}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}
+  });
+}
+function renderRanking(elId,sorted,campo,color){
+  const max=sorted[0]?sorted[0][campo]:1;
+  document.getElementById(elId).innerHTML=sorted.map((a,i)=>{
+    const val=a[campo]||0;
+    const pct=max>0?Math.round((val/max)*100):0;
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+    return `<div class="rank-item">
+      <div class="rank-num">${medal}</div>
+      <div class="rank-name">${a.nombre.split(' ').slice(0,2).join(' ')}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="rank-val" style="color:${color}">${val}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+//  EXPORT PDF
+// ══════════════════════════════════════════════
+function exportPDF(){
+  renderGraficas();showTab('graficas');
+  setTimeout(()=>window.print(),600);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+renderLista();
+actualizarStats();
+renderLog();
+iniciarEscuchaNFC();   // escucha NFC pasiva en segundo plano
+leerDesdeURL();        // procesa si viene de calcomanía con URL
+
+// Demo data
+(function seedDemo(){
+  if(Object.keys(cargarMes()).length>0) return;
+  const mes={};const now=new Date();
+  for(let d=1;d<now.getDate();d++){
+    const fecha=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow=new Date(fecha+'T12:00:00').getDay();
+    if(dow===0||dow===6) continue;
+    mes[fecha]=NOMBRES.map((n,i)=>{
+      const r=Math.random();
+      return{id:i,nombre:n,estado:r<0.08?'ausente':r<0.2?'retardo':'presente',horaEntrada:r<0.08?null:'8:30',baños:Math.floor(Math.random()*3)};
+    });
+  }
+  localStorage.setItem('asistencia_'+yyyymm(),JSON.stringify(mes));
+})();
+</script>
+</body>
+</html>
